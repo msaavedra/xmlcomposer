@@ -1,0 +1,28 @@
+
+This package is based off a project I wrote over a decade ago. At the time,
+I had very little professional development experience, and was learning
+both python and general web backend programming.
+
+In those days there were not many options in python for dynamically producing
+XML and HTML. I found myself mixing large strings containing chunks of XML
+in with my python code, and the result was a horrible mess. I wrote this
+module so that I could generate markup programmatically.
+
+Nowadays, there are a ton of options, several entire frameworks in fact, for
+producing web documents using python. One commonality between them (and 
+similar frameworks in other languages) is the use of templates that mix
+program logic with markup. I look at them and it always brings me back to
+the horrible mess I was writing 1999. I wanted something with a different
+approach, that completely separated logic and content.
+
+Therefore, I have dusted off the old package, updated it to more modern
+python, corrected many errors and design flaws, and generally made it more
+useful. For all intents and purposes, it has become a total rewrite.
+
+To install, copy or symlink the xmlcomposer subdirectory into your
+python path.
+
+Documentation and a tutorial will be coming soon.
+
+If you have questions, email mtsaavedra AT gmail DOT com.
+
