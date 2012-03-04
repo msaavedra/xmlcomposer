@@ -129,7 +129,7 @@ class DocType(TextBlock):
 
 
 # Either finish this or decide not to support it.
-class ProcessingInstruction(TextBlock): pass
+#class ProcessingInstruction(TextBlock): pass
 
 
 class EmptyElement(Element, TextBlock):
