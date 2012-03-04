@@ -10,7 +10,8 @@ rss = schema.load(
     #export_path='./rss2.py'
     namespace_prefix='rss'
     )
-
+print dir(rss)
+sys,exit(0)
 x = xmlcomposer.Namespace(module='xmlcomposer.formats.xhtml_1_strict')
 
 def fill_hello(session):

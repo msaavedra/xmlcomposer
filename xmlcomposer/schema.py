@@ -8,6 +8,15 @@ from operator import attrgetter
 from _namespace import Namespace
 from _document import EmptyElement, NestedElement, FormattedElement, FlatElement
 
+if os.name == 'posix':
+    CACHE = os.path.join(os.environ['HOME'], '.config/xmlcomposer/schema/')
+elif sys.platform == 'win32' and os.environ.has_key('APPDATA'):
+    CACHE = os.path.join(os.environ['APPDATA'], 'xmlcomposer/cache/schema/')
+else:
+    # Unknown system (maybe win9x?). Punt.
+    CACHE = os.path.join(os.getcwd(), 'xmlcomposer/cache/schema/')
+CACHE = os.path.normpath(CACHE)
+
 def load(schema_location, namespace_id, namespace_prefix=''):
     schema = SchemaDocument(schema_location)
     return schema.parse(namespace_id, namespace_prefix)
@@ -69,9 +78,8 @@ class SchemaDocument(object):
         return location, base
     
     def open_location(self):
-        cache_base = '/home/mike/.cache/xmlcomposer/schema/' # FIX!!!
         cache_relative_path = self.location.split('//', 1)[1]
-        cache_path = os.path.join(cache_base, cache_relative_path)
+        cache_path = os.path.join(CACHE, cache_relative_path)
         if os.path.isfile(cache_path):
             f = open(cache_path, 'r')
             text = f.read()
