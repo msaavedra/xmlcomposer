@@ -12,7 +12,10 @@ from _namespace import BASE_SCOPE, DocumentScope
 from _layout import DEFAULT_LAYOUT, SPARTAN_LAYOUT, MINIMAL_LAYOUT
 
 class Document(TextBlock):
+    """A class used to generate an entire document.
     
+    It contains the root element, and optionally a prolog.
+    """
     def __init__(self, root, prolog=None):
         root.is_root = True
         self.root = root
@@ -34,7 +37,8 @@ class Document(TextBlock):
 
 
 class Prolog(TextBlock):
-    
+    """A TextBlock-compatible holder for all XML lines before the root element.
+    """
     def __init__(self, *contents):
         self.contents = contents
     
@@ -46,6 +50,10 @@ class Prolog(TextBlock):
 
 class Template(SubstitutableTextBlock):
     """XML, from a single line to a whole document, loaded from a file.
+    
+    The contents from the file are not parsed to test for validity or
+    well-formedness. You can make substitutions like in the
+    SubstitutableTextBlock on which it is based.
     """
     def __init__(self, file_name):
         f = open(file_name, 'r')
@@ -57,7 +65,9 @@ class Template(SubstitutableTextBlock):
 class PCData(SubstitutableTextBlock):
     """A section of parsed character data.
     
-    Like SubstitutableTextBlock, but the arg is a single string.
+    Like SubstitutableTextBlock, but the arg is a single string. This
+    class is seldom needed in practice, because the element classes are
+    able to accept XML PCDATA sections as plain strings.
     """
     def __init__(self, text, escape=False):
         if escape:
@@ -66,7 +76,10 @@ class PCData(SubstitutableTextBlock):
 
 
 class CData(SubstitutableTextBlock):
+    """A section of unparsed character data.
     
+    Like SubstitutableTextBlock, but the arg is a single string.
+    """
     def generate(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
         yield layout('<![CDATA[')
         for line in super(Cdata, self).generate(layout, session, scope):
@@ -75,14 +88,16 @@ class CData(SubstitutableTextBlock):
 
 
 class Comment(TextBlock):
-    
+    """An unparsed comment section in an XML document.
+    """
     def __init__(self, text):
         text = '<!-- %s -->' % text
         super(Comment, self).__init__(text.split('\n'))
 
 
 class XMLDeclaration(TextBlock):
-    
+    """A line in the prolog to specify xml version, encoding, etc.
+    """
     def __init__(self, **attributes):
         attributes = {'version': '1.0', 'encoding': 'UTF-8'}
         attributes.update(attributes)
@@ -94,7 +109,11 @@ class XMLDeclaration(TextBlock):
 
 
 class DocType(TextBlock):
+    """A line in the prolog to provide schema information to parsers.
     
+    The XML spec allows the use of internal DOCTYPE code, but this
+    implementation only supports external references.
+    """
     def __init__(self, root_name, system_id='', public_id=''):
         if system_id and public_id:
             self.line = '<!DOCTYPE %s PUBLIC "%s" "%s">' % (
