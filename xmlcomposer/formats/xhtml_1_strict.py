@@ -3,161 +3,166 @@ import xmlcomposer
 
 __namespace__ = 'http://www.w3.org/1999/xhtml'
 
-class A(xmlcomposer.FlatElement): pass
+class A(xmlcomposer.Element): pass
 
-class Abbr(xmlcomposer.FlatElement): pass
+class Abbr(xmlcomposer.Element): pass
 
-class Acronym(xmlcomposer.FlatElement): pass
+class Acronym(xmlcomposer.Element): pass
 
-class Address(xmlcomposer.FlatElement): pass
+class Address(xmlcomposer.Element): pass
 
-class Area(xmlcomposer.EmptyElement): pass
+class Area(xmlcomposer.Element): pass
 
-class B(xmlcomposer.FlatElement): pass
+class B(xmlcomposer.Element): pass
 
-class Base(xmlcomposer.EmptyElement): pass
+class Base(xmlcomposer.Element): pass
 
-class Bdo(xmlcomposer.FlatElement): pass
+class Bdo(xmlcomposer.Element): pass
 
-class Big(xmlcomposer.FlatElement): pass
+class Big(xmlcomposer.Element): pass
 
-class Blockquote(xmlcomposer.FlatElement): pass
+class Blockquote(xmlcomposer.Element): pass
 
-class Body(xmlcomposer.NestedElement): pass
+class Body(xmlcomposer.Element): pass
 
-class Br(xmlcomposer.EmptyElement): pass
+class Br(xmlcomposer.Element): pass
 
-class Button(xmlcomposer.FlatElement): pass
+class Button(xmlcomposer.Element): pass
 
-class Caption(xmlcomposer.FlatElement): pass
+class Caption(xmlcomposer.Element): pass
 
-class Cite(xmlcomposer.FlatElement): pass
+class Cite(xmlcomposer.Element): pass
 
-class Code(xmlcomposer.FormattedElement): pass
+class Code(xmlcomposer.Element):
+    preformatted = True
 
-class Col(xmlcomposer.FlatElement): pass
+class Col(xmlcomposer.Element): pass
 
-class Colgroup(xmlcomposer.NestedElement): pass
+class Colgroup(xmlcomposer.Element): pass
 
-class Dd(xmlcomposer.FlatElement): pass
+class Dd(xmlcomposer.Element): pass
 
-class Del(xmlcomposer.FlatElement): pass
+class Del(xmlcomposer.Element): pass
 
-class Dfn(xmlcomposer.FlatElement): pass
+class Dfn(xmlcomposer.Element): pass
 
-class Div(xmlcomposer.NestedElement): pass
+class Div(xmlcomposer.Element): pass
 
-class Dl(xmlcomposer.NestedElement): pass
+class Dl(xmlcomposer.Element): pass
 
-class Dt(xmlcomposer.FlatElement): pass
+class Dt(xmlcomposer.Element): pass
 
-class Em(xmlcomposer.FlatElement): pass
+class Em(xmlcomposer.Element): pass
 
-class Fieldset(xmlcomposer.NestedElement): pass
+class Fieldset(xmlcomposer.Element): pass
 
-class Form(xmlcomposer.NestedElement): pass
+class Form(xmlcomposer.Element): pass
 
-class H1(xmlcomposer.FlatElement): pass
+class H1(xmlcomposer.Element): pass
 
-class H2(xmlcomposer.FlatElement): pass
+class H2(xmlcomposer.Element): pass
 
-class H3(xmlcomposer.FlatElement): pass
+class H3(xmlcomposer.Element): pass
 
-class H4(xmlcomposer.FlatElement): pass
+class H4(xmlcomposer.Element): pass
 
-class H5(xmlcomposer.FlatElement): pass
+class H5(xmlcomposer.Element): pass
 
-class H6(xmlcomposer.FlatElement): pass
+class H6(xmlcomposer.Element): pass
 
-class Head(xmlcomposer.NestedElement): pass
+class Head(xmlcomposer.Element): pass
 
-class Hr(xmlcomposer.EmptyElement): pass
+class Hr(xmlcomposer.Element): pass
 
-class Html(xmlcomposer.NestedElement):
+class Html(xmlcomposer.Element):
     default_attributes = {
         'xml:lang': 'en',
         'lang': 'en'
         }
 
-class I(xmlcomposer.FlatElement): pass
+class I(xmlcomposer.Element): pass
 
-class Img(xmlcomposer.EmptyElement): pass
+class Img(xmlcomposer.Element): pass
 
-class Input(xmlcomposer.EmptyElement): pass
+class Input(xmlcomposer.Element): pass
 
-class Ins(xmlcomposer.FlatElement): pass
+class Ins(xmlcomposer.Element): pass
 
-class Kbd(xmlcomposer.FlatElement): pass
+class Kbd(xmlcomposer.Element): pass
 
-class Label(xmlcomposer.NestedElement): pass
+class Label(xmlcomposer.Element): pass
 
-class Legend(xmlcomposer.FlatElement): pass
+class Legend(xmlcomposer.Element): pass
 
-class Li(xmlcomposer.FlatElement): pass
+class Li(xmlcomposer.Element): pass
 
-class Link(xmlcomposer.EmptyElement): pass
+class Link(xmlcomposer.Element): pass
 
-class Map(xmlcomposer.NestedElement): pass
+class Map(xmlcomposer.Element): pass
 
-class Meta(xmlcomposer.EmptyElement): pass
+class Meta(xmlcomposer.Element): pass
 
-class Noscript(xmlcomposer.NestedElement): pass
+class Noscript(xmlcomposer.Element): pass
 
-class Object(xmlcomposer.NestedElement): pass
+class Object(xmlcomposer.Element): pass
 
-class Ol(xmlcomposer.NestedElement): pass
+class Ol(xmlcomposer.Element): pass
 
-class Optgroup(xmlcomposer.NestedElement): pass
+class Optgroup(xmlcomposer.Element): pass
 
-class Option(xmlcomposer.FlatElement): pass
+class Option(xmlcomposer.Element): pass
 
-class P(xmlcomposer.FlatElement): pass
+class P(xmlcomposer.Element): pass
 
-class Param(xmlcomposer.EmptyElement): pass
+class Param(xmlcomposer.Element): pass
 
-class Pre(xmlcomposer.FormattedElement): pass
+class Pre(xmlcomposer.Element):
+    preformatted = True
     
-class Q(xmlcomposer.FlatElement): pass
+class Q(xmlcomposer.Element): pass
 
-class Samp(xmlcomposer.FlatElement): pass
+class Samp(xmlcomposer.Element): pass
 
-class Script(xmlcomposer.FormattedElement): pass
+class Script(xmlcomposer.Element):
+    preformatted = True
 
-class Select(xmlcomposer.NestedElement): pass
+class Select(xmlcomposer.Element): pass
 
-class Small(xmlcomposer.FlatElement): pass
+class Small(xmlcomposer.Element): pass
 
-class Span(xmlcomposer.FlatElement): pass
+class Span(xmlcomposer.Element): pass
 
-class Strong(xmlcomposer.FlatElement): pass
+class Strong(xmlcomposer.Element): pass
 
-class Style(xmlcomposer.FormattedElement): pass
+class Style(xmlcomposer.Element):
+    preformatted = True
 
-class Sub(xmlcomposer.FlatElement): pass
+class Sub(xmlcomposer.Element): pass
 
-class Sup(xmlcomposer.FlatElement): pass
+class Sup(xmlcomposer.Element): pass
 
-class Table(xmlcomposer.NestedElement): pass
+class Table(xmlcomposer.Element): pass
 
-class Tbody(xmlcomposer.NestedElement): pass
+class Tbody(xmlcomposer.Element): pass
 
-class Td(xmlcomposer.FlatElement): pass
+class Td(xmlcomposer.Element): pass
 
-class Textarea(xmlcomposer.FlatElement): pass
+class Textarea(xmlcomposer.Element): pass
 
-class Tfoot(xmlcomposer.NestedElement): pass
+class Tfoot(xmlcomposer.Element): pass
 
-class Th(xmlcomposer.FlatElement): pass
+class Th(xmlcomposer.Element): pass
 
-class Thead(xmlcomposer.NestedElement): pass
+class Thead(xmlcomposer.Element): pass
 
-class Title(xmlcomposer.FlatElement): pass
+class Title(xmlcomposer.Element): pass
 
-class Tr(xmlcomposer.NestedElement): pass
+class Tr(xmlcomposer.Element): pass
 
-class Tt(xmlcomposer.FormattedElement): pass
+class Tt(xmlcomposer.Element):
+    preformatted = True
 
-class Ul(xmlcomposer.NestedElement): pass
+class Ul(xmlcomposer.Element): pass
 
-class Var(xmlcomposer.FlatElement): pass
+class Var(xmlcomposer.Element): pass
 

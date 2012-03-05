@@ -5,32 +5,38 @@ the package.
 """
 
 from xml.sax.saxutils import escape, unescape
-from types import FunctionType, MethodType
 
-from _text import TextBlock
-from _namespace import DocumentScope
+from _text import TextBlock, PCData, PreformattedPCData, CallBack
+from _namespace import DocumentScope, BASE_SCOPE
+from _layout import DEFAULT_LAYOUT, SPARTAN_LAYOUT, MINIMAL_LAYOUT
 
-MODULE_NAME = __name__
 
-class Element(object):
-    """A very abstract ancestor class for representing well-formed XML elements.
+
+class Element(TextBlock):
+    """An ancestor class for representing well-formed XML elements.
     
-    This provides a means to its subclasses to represent element attributes
-    as if they were items in a dictionary.
+    This provides a means to its subclasses to to add child content, and
+    to represent element attributes as if they were items in a dictionary.
     
-    Users of this package should never need to make instances of this class,
+    Users of this package should rarely need to make instances of this class,
     or even make subclasses directly from it. The only legitimate use
     is to test to see if an object is an element by using the isinstance()
     and issubclass() built-in functions.
     """
     
-    # These both can, but need not, be replaced in subclasses.
+    # These can, but need not, be replaced in subclasses.
     tag_name = None
     namespace = None
     default_attributes = {}
     
-    def __init__(self, **attributes):
+    def __init__(self, *contents, **attributes):
         """Initialize an element instance.
+        
+        Any contents you wish to put inside this element can be passed as
+        positional args. If such args are not descended from TextBlock,
+        they will be converted to a strings, then wrapped in a PCData
+        instance. This is useful to pass plain strings, or any object where
+        you have defined its __str__ method to return something useful.
         
         You can list any attributes of the element as keyword arguments.
         Note that python reserved words cannot be used as attribute
@@ -48,18 +54,25 @@ class Element(object):
         
         # Assign a tag name if it isn't defined explicitly by the class.
         # Try to do what's intuitive for anyone writing subclasses.
-        # If inheriting from a base class (anything in this package), use the
+        # If inheriting from the Element base class, use the
         # new subclass's name. Otherwise, use the name of the parent class.
         if self.tag_name is None:
             for base in self.__class__.__bases__:
                 if not issubclass(base, Element):
                     # The subclass is using multiple inheritance. Skip.
                     continue
-                if base.__module__.startswith('xmlcomposer.'):
+                if base is Element:
                     self.tag_name = self.__class__.__name__.lower()
                 else:
                     self.tag_name = base.__name__.lower()
                 break
+        
+        self._contents = []
+        self._content_types = set()
+        
+        # Fill our contents. Don't access the list directly, but use our add()
+        # method, which validates and processes them.
+        self.add(*contents)
     
     def __setitem__(self, key, value):
         if key.endswith('_'):
@@ -74,6 +87,36 @@ class Element(object):
     
     def __delitem__(self, key):
         del self._attributes[key]
+    
+    def __call__(self, *contents):
+        """An alternate method to add sub-elements.
+        
+        
+        See the __init__ documentation for information on what type of
+        contents may be passed here.
+        
+        Since it returns self, this can be used to make the element
+        specification more readable and XML-like, with the attributes listed
+        first and sub-elements second. Here is an example (the
+        Example class used here being a ContainerElement subclass):
+        
+        >>> x = Example(id="test")('This is a test.')
+        >>> print x
+        <example id="test">This is a test.</example>
+        """
+        self.add(*contents)
+        return self
+    
+    def add(self, *elements):
+        """Add any number of objects to the contents of this element.
+        
+        See the __init__ documentation for 
+        """
+        for element in elements:
+            if not isinstance(element, TextBlock):
+                element = PCData(str(element))
+            self._contents.append(element)
+            self._content_types.add(self.determine_type(element))
     
     def has_key(self, key):
         return self._attributes.has_key()
@@ -110,80 +153,6 @@ class Element(object):
         if namespace.__prefix__:
             attr_name = '%s:%s' % (attr_name, namespace.__prefix__)
         return ' %s="%s"' % (attr_name, namespace.__name__)
-
-
-class ContainerElement(Element):
-    """An abstract ancestor class for representing container XML elements.
-    
-    This builds off of the Element class by providing a means to include
-    the child content found between the opening and closing tags of an
-    element.
-    
-    Users of this package should never need to make instances of this class,
-    or even make subclasses directly from it. The only legitimate use
-    is to test to see if an object is an element by using the isinstance()
-    and issubclass() built-in functions.
-    """
-    
-    def __init__(self, *contents, **attributes):
-        """Initialize a container Element.
-        
-        Any contents you wish to put inside this element can be passed as
-        positional args. Optionally, instead of element instances, you can
-        pass a function or method (must be a real function or method,
-        not just a callable object). It must require no arguments, and return
-        a single Element or TextBlock subclass instance. The function will not
-        be called until document generation-time, so it can be used to create
-        truly dynamic content.
-        
-        Anything positional args other than element instances or
-        functions/methods will be converted to a strings and wrapped
-        in a StringBlock classes. This is useful to pass plain strings, or
-        any object where you have defined its __str__ method to return
-        something useful.
-        
-        You can specify attributes as keyword elements with the same
-        functionality and limitations as in the Element class.
-        """
-        super(ContainerElement, self).__init__(**attributes)
-        self._contents = []
-        
-        # Fill our contents. Don't access the list directly, but use our add()
-        # method, which validates and processes them.
-        self.add(*contents)
-    
-    def __call__(self, *contents):
-        """An alternate method to add sub-elements.
-        
-        
-        See the __init__ documentation for information on what type of
-        contents may be passed here.
-        
-        Since it returns self, this can be used to make the element
-        specification more readable and XML-like, with the attributes listed
-        first and sub-elements second. Here is an example (the
-        Example class used here being a ContainerElement subclass):
-        
-        >>> x = Example(id_="test")('This is a test.')
-        >>> x.generate()
-        <example id="test">This is a test.</example>
-        """
-        self.add(*contents)
-        return self
-    
-    def add(self, *elements):
-        """Add any number of objects to the contents of this element.
-        
-        See the __init__ documentation for 
-        """
-        for element in elements:
-            if not (
-                    isinstance(element, TextBlock) \
-                    or isinstance(element, FunctionType) \
-                    or isinstance(element, MethodType)
-                    ):
-                element = TextBlock(str(element).split('\n'))
-            self._contents.append(element)
     
     def open_tag(self, xmlns, scope):
         """Return a string representing the opening version of the tag.
@@ -200,5 +169,75 @@ class ContainerElement(Element):
         """Return a string representing the closing version of the tag.
         """
         return '</%s%s>' % (self.format_prefix(), self.tag_name)
-
+    
+    def determine_type(self, element):
+        if isinstance(element, Element):
+            return 'element'
+        elif isinstance(element, PreformattedPCData):
+            return 'preformatted'
+        elif isinstance(element, PCData):
+            return 'pcdata'
+        elif isinstance(element, CallBack):
+            return self.determine_type(element.return_type)
+        else:
+            return('indeterminate')
+    
+    def generate(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
+        if hasattr(self, 'preformatted'):
+            return self._generate_preformatted(layout, scope, session)
+        if not self._content_types:
+            return self._generate_empty(layout, scope, session)
+        elif 'preformatted' in self._content_types:
+            return self._generate_preformatted(layout, scope, session)
+        elif 'pcdata' in self._content_types \
+                and 'indeterminate' not in self._content_types:
+            return self._generate_flat(layout, scope, session)
+        else:
+            return self._generate_nested(layout, scope, session)
+    
+    def _generate_empty(self, layout, scope, session):
+        xmlns = self.determine_scope(scope)[0]
+        yield layout('<%s%s%s %s/>' % (
+            self.format_prefix(),
+            self.tag_name,
+            xmlns,
+            self.format_attributes(scope)
+            ))
+    
+    def _generate_preformatted(self, layout, scope, session):
+        xmlns, inner_scope = self.determine_scope(scope)
+        yield layout(self.open_tag(xmlns, scope)).rstrip()
+        for element in self._contents:
+            if isinstance(element, CallBack):
+                element = element.func(session)
+            for line in element.generate(SPARTAN_LAYOUT, inner_scope, session):
+                yield line.rstrip()
+        yield layout(self.close_tag(scope)).lstrip()
+    
+    def _generate_flat(self, layout, scope, session):
+        xmlns, inner_scope = self.determine_scope(scope)
+        parts = []
+        last = None
+        for element in self._contents:
+            if isinstance(element, CallBack):
+                element = element.func(session)
+            part = ''.join(
+                element.generate(MINIMAL_LAYOUT, inner_scope, session)
+                )
+            parts.append(part)
+            last = element
+        line = '%s%s%s' % (
+            self.open_tag(xmlns, scope), ''.join(parts), self.close_tag(scope)
+            )
+        yield layout(line, wrap=True)
+    
+    def _generate_nested(self, layout, scope, session):
+        xmlns, inner_scope = self.determine_scope(scope)
+        yield layout(self.open_tag(xmlns, scope))
+        for element in self._contents:
+            if isinstance(element, CallBack):
+                element = element.func(session)
+            for line in element.generate(layout.indent(), inner_scope, session):
+                yield line
+        yield layout(self.close_tag(scope))
 

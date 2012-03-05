@@ -6,7 +6,7 @@ from urlparse import urlparse, urlunparse
 from operator import attrgetter
 
 from _namespace import Namespace
-from _document import EmptyElement, NestedElement, FormattedElement, FlatElement
+from _element import Element
 
 if os.name == 'posix':
     CACHE = os.path.join(os.environ['HOME'], '.config/xmlcomposer/schema/')
@@ -32,10 +32,11 @@ def export(schema_location, namespace_id, export_path=None):
         f.write("__namespace__='%s'\n" % namespace_id)
         
         for element in sorted(namespace, key=attrgetter('__name__')):
-            ancestors = ', '.join(
-                ['xmlcomposer.' + base.__name__ for base in element.__bases__]
-                )
-            f.write('\nclass %s(%s): pass\n' % (element.__name__, ancestors))
+            f.write('\nclass %s(xmlcomposer.Element):\n' % element.__name__)
+            if hasattr(element, 'preformatted'):
+                f.write('    preformatted = True\n')
+            else:
+                f.write('    pass\n')
         f.write('\n')
         f.flush()
     finally:
@@ -145,15 +146,10 @@ class DtdParser(object):
             name = self.substitute_entities(name).title()
             contents = self.substitute_entities(contents)
             
-            if 'EMPTY' in contents:
-                ancestor = EmptyElement
-            elif ',' in contents or '#PCDATA' not in contents:
-                ancestor = NestedElement
-            elif '#PCDATA' in contents and '|' not in contents:
-                ancestor = FlatElement
-            else:
-                ancestor = FormattedElement
-            new_class = type(name, (ancestor,), {'__module__': namespace})
+            attribs = {'__module__': namespace}
+            if not ('EMPTY' in contents or ',' in contents):
+                attribs['preformatted'] = True
+            new_class = type(name, (Element,), attribs)
             setattr(namespace, name, new_class)
     
     def substitute_entities(self, text):
