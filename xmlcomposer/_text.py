@@ -60,6 +60,8 @@ class SubstitutableTextBlock(TextBlock):
         TextBlock or a subclass thereof. The layout arg is a Layout object
         that should be used to lay out the output of the callback function.
         """
+        if isinstance(callback, CallBack):
+            callback = callback.func
         def yield_substituted_lines(contents, scope, session):
             """A generator-function closure for handling substitutions.
             """
@@ -83,4 +85,51 @@ class SubstitutableTextBlock(TextBlock):
             contents = substitution(contents, scope, session)
         for line in contents:
             yield layout(line)
+
+
+class PCData(SubstitutableTextBlock):
+    """A section of parsed character data.
+    
+    Like SubstitutableTextBlock, but the arg is a single string. This
+    class is seldom needed in practice, because the element classes are
+    able to accept XML PCDATA sections as plain strings.
+    """
+    def __init__(self, text, escape=False):
+        if escape:
+            text = escape(text)
+        super(PCData, self).__init__(text.split('\n'))
+
+
+class PreformattedPCData(SubstitutableTextBlock):
+    """
+    """
+    preformatted = True
+    
+    def __init__(self, lines):
+        super(PreformattedPCData, self).__init__(lines)
+
+
+class CData(SubstitutableTextBlock):
+    """A section of unparsed character data.
+    
+    Like SubstitutableTextBlock, but the arg is a single string.
+    """
+    def generate(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
+        yield layout('<![CDATA[')
+        for line in super(Cdata, self).generate(layout, session, scope):
+            yield line
+        yield layout(']]>')
+
+
+class CallBack(TextBlock):
+    """
+    """
+    def __init__(self, func, return_type=None):
+        self.func = func
+        if isinstance(return_type, CallBack):
+            raise Exception()
+        self.return_type = return_type
+    
+    def generate(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
+        return self.func(session).generate(layout, scope, session)
 
