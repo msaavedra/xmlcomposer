@@ -4,6 +4,7 @@ import sys
 import urllib2
 from urlparse import urlparse, urlunparse
 from operator import attrgetter
+from xml.dom import minidom
 
 from _namespace import Namespace
 from _element import Element
@@ -56,6 +57,7 @@ class SchemaDocument(object):
         extension_parser_map = {
             'dtd': DtdParser,
             'xsd': XsdParser,
+            'rng': RngParser,
             }
         extension = os.path.splitext(self.location)[1][1:]
         parse = extension_parser_map[extension]
@@ -100,7 +102,7 @@ class DtdParser(object):
     
     def __init__(self, schema_doc, namespace):
         self.entities = {}
-        self.elements = {}
+        self.elements = []
         self.opened_urls = []
         for declaration in self.yield_declarations(schema_doc):
             self.process_declaration(declaration, schema_doc)
@@ -124,8 +126,8 @@ class DtdParser(object):
     
     def process_declaration(self, declaration, schema_doc):
         if declaration.startswith('ELEMENT'):
-            name, contents = declaration.split(None, 2)[1:]
-            self.elements[name] = contents
+            name = declaration.split(None, 2)[1]
+            self.elements.append(name)
         elif declaration.startswith('ENTITY %'):
             if ' SYSTEM ' in declaration:
                 mod_uri = declaration.split(None, 4)[4]
@@ -142,13 +144,9 @@ class DtdParser(object):
                 self.process_declaration(mod_declaration, mod_doc)
     
     def fill_namespace(self, namespace):
-        for name, contents in self.elements.items():
+        attribs = {'__module__': namespace}
+        for name in self.elements:
             name = self.substitute_entities(name).title()
-            contents = self.substitute_entities(contents)
-            
-            attribs = {'__module__': namespace}
-            if not ('EMPTY' in contents or ',' in contents):
-                attribs['preformatted'] = True
             new_class = type(name, (Element,), attribs)
             setattr(namespace, name, new_class)
     
@@ -161,5 +159,27 @@ class DtdParser(object):
         return text
 
 
-class XsdParser(object): pass
+class XsdParser(object):
+    uri = 'http://www.w3.org/2001/XMLSchema'
+    
+    def __init__(self, schema_doc, namespace):
+        doc = minidom.parseString(schema_doc.text)
+        elements = doc.getElementsByTagName('element')
+        if not elements:
+            elements = doc.getElementsByTagNameNS(self.uri, 'element')
+        
+        attribs = {'__module__': namespace}
+        for element in elements:
+            name = str(element.getAttribute('name')).title()
+            if not name:
+                continue
+            new_class = type(name, (Element,), attribs)
+            setattr(namespace, name, new_class)
+
+class RngParser(XsdParser):
+    uri = 'http://relaxng.org/ns/structure/1.0'
+
+
+
+
 
