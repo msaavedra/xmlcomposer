@@ -33,8 +33,12 @@ def export(schema_location, namespace_id, export_path=None):
         f.write("__namespace__='%s'\n" % namespace_id)
         
         for element in sorted(namespace, key=attrgetter('__name__')):
-            line = '\nclass %s(xmlcomposer.Element): pass\n' % element.__name__
-            f.write(line)
+            f.write('\nclass %s(xmlcomposer.Element):\n' % element.__name__)
+            if element.tag_name == element.__name__.lower():
+                f.write('    pass\n')
+            else:
+                f.write("    tag_name = '%s'\n" % element.tag_name)
+        
         f.write('\n')
         f.flush()
     finally:
@@ -141,11 +145,12 @@ class DtdParser(object):
                 self.process_declaration(mod_declaration, mod_doc)
     
     def fill_namespace(self, namespace):
-        attribs = {'__module__': namespace}
         for name in self.elements:
-            name = self.substitute_entities(name).title()
-            new_class = type(name, (Element,), attribs)
-            setattr(namespace, name, new_class)
+            name = self.substitute_entities(name)
+            class_name = name[0].title() + name[1:]
+            attribs = {'__module__': namespace, 'tag_name': name}
+            new_class = type(class_name, (Element,), attribs)
+            setattr(namespace, class_name, new_class)
     
     def substitute_entities(self, text):
         while '%' in text:
@@ -165,13 +170,14 @@ class XsdParser(object):
         if not elements:
             elements = doc.getElementsByTagNameNS(self.uri, 'element')
         
-        attribs = {'__module__': namespace}
         for element in elements:
-            name = str(element.getAttribute('name')).title()
+            name = str(element.getAttribute('name'))
             if not name:
                 continue
-            new_class = type(name, (Element,), attribs)
-            setattr(namespace, name, new_class)
+            class_name = name[0].title() + name[1:]
+            attribs = {'__module__': namespace, 'tag_name': name}
+            new_class = type(class_name, (Element,), attribs)
+            setattr(namespace, class_name, new_class)
 
 class RngParser(XsdParser):
     uri = 'http://relaxng.org/ns/structure/1.0'
