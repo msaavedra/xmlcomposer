@@ -3,7 +3,6 @@
 * Add documentation/tutorial
 * Add copyright/legal information in each file as needed.
 * Add a ProcessingInstruction class
-* Add schema parsing for XSD and RELAX NG
 * Work out Django compatibility
 * Add formats: HTML5, RSS, etc.
 * Make a "smart escape" routine that doesn't mess up entities like &amp;

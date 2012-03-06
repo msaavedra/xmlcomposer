@@ -33,11 +33,8 @@ def export(schema_location, namespace_id, export_path=None):
         f.write("__namespace__='%s'\n" % namespace_id)
         
         for element in sorted(namespace, key=attrgetter('__name__')):
-            f.write('\nclass %s(xmlcomposer.Element):\n' % element.__name__)
-            if hasattr(element, 'preformatted'):
-                f.write('    preformatted = True\n')
-            else:
-                f.write('    pass\n')
+            line = '\nclass %s(xmlcomposer.Element): pass\n' % element.__name__
+            f.write(line)
         f.write('\n')
         f.flush()
     finally:
