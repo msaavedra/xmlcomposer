@@ -34,7 +34,7 @@ class Namespace(ModuleType):
     
     def __iter__(self):
         for obj in vars(self).itervalues():
-            if isinstance(obj, type) and issubclass(obj, Element):
+            if isinstance(obj, type) and hasattr(obj, 'tag_name'):
                 yield obj
     
     def __contains__(self, element):
