@@ -149,6 +149,8 @@ class Element(TextBlock):
             return ''
     
     def format_xmlns(self, namespace):
+        if not namespace.__name__:
+            return ''
         attr_name = 'xmlns'
         if namespace.__prefix__:
             attr_name = '%s:%s' % (attr_name, namespace.__prefix__)

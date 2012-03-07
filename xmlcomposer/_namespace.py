@@ -14,18 +14,18 @@ class Namespace(ModuleType):
             for item in vars(module).itervalues():
                 if hasattr(item, 'tag_name'):
                     self.__setattr__(item.__name__, item)
-            super(Namespace, self).__setattr__(
-                '__name__', module.__namespace__
-                )
-        
-        if not self.__name__:
-            raise Exception('Name not provided as argument or by module.')
+            if hasattr(module, '__namespace__'):
+                super(Namespace, self).__setattr__(
+                    '__name__', module.__namespace__
+                    )
     
     def __repr__(self):
         ret_val = '<Namespace'
         if self.__prefix__:
             ret_val += ' "%s"' % self.__prefix__
-        ret_val += ' "%s">' % self.__name__
+        if self.__name__:
+            ret_val += ' "%s"' % self.__name__
+        ret_val += '>'
         return ret_val
     
     def __setattr__(self, name, value):

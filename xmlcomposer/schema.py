@@ -18,11 +18,11 @@ else:
     CACHE = os.path.join(os.getcwd(), 'xmlcomposer/cache/schema/')
 CACHE = os.path.normpath(CACHE)
 
-def load(schema_location, namespace_id, namespace_prefix=''):
+def load(schema_location, namespace_id='', namespace_prefix=''):
     schema = SchemaDocument(schema_location)
     return schema.parse(namespace_id, namespace_prefix)
 
-def export(schema_location, namespace_id, export_path=None):
+def export(schema_location, namespace_id='', export_path=None):
     namespace = load(schema_location, namespace_id)
     if export_path:
         f = open(export_path, 'w')
@@ -30,7 +30,8 @@ def export(schema_location, namespace_id, export_path=None):
         f = sys.stdout
     try:
         f.write('\nimport xmlcomposer\n\n')
-        f.write("__namespace__='%s'\n" % namespace_id)
+        if namespace_id:
+            f.write("__namespace__='%s'\n\n" % namespace_id)
         
         for element in sorted(namespace, key=attrgetter('__name__')):
             f.write('\nclass %s(xmlcomposer.Element):\n' % element.__name__)
