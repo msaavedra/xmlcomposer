@@ -77,13 +77,10 @@ class Element(TextBlock):
     def __setitem__(self, key, value):
         if key.endswith('_'):
             key = key[:-1]
-        # We should properly handle values whether they are already escaped
-        # or not.
-        value = unescape(value, {'&quot;': '"'})
-        self._attributes[key] = escape(value, {'"': '&quot;'})
+        self._attributes[key] = self.escape(value, {'"': '&quot;'})
     
     def __getitem__(self, key):
-        return unescape(self._attributes[key], {'&quot;': '"'})
+        return self.unescape(self._attributes[key], {'&quot;': '"'})
     
     def __delitem__(self, key):
         del self._attributes[key]

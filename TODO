@@ -5,6 +5,5 @@
 * Add a ProcessingInstruction class
 * Work out Django compatibility
 * Add formats: HTML5, RSS, etc.
-* Make a "smart escape" routine that doesn't mess up entities like &amp;
 * Cache expiration for schema loader.
 

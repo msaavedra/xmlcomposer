@@ -4,6 +4,8 @@ This used internally, and should generally be avoided by users of
 the package.
 """
 
+import re
+
 from _layout import SPARTAN_LAYOUT
 from _namespace import BASE_SCOPE
 
@@ -15,6 +17,9 @@ class TextBlock(object):
     its subclasses.
     """
     
+    # A regular expression for finding unescaped non-entity ampersands.
+    _amp_regex = re.compile(r'&(?P<suffix>([^;&\s]{0,32}(?=(&|\s|\Z))))')
+    
     def __init__(self, lines):
         """Initialize the instance with an iterable holding lines of XML.
         """
@@ -22,6 +27,26 @@ class TextBlock(object):
     
     def __str__(self):
         return ''.join(self.generate())
+    
+    @classmethod
+    def escape(cls, text, substitutions=None):
+        if substitutions:
+            for old, new in substitutions.items():
+                text = text.replace(old, new)
+        text = cls._amp_regex.sub(cls.__replace_on_match, text)
+        text = text.replace('<', '&lt;')
+        return text
+    
+    @classmethod
+    def __replace_on_match(self, match):
+        return '&amp;'+ match.group('suffix')
+    
+    @classmethod
+    def unescape(cls, text, substitutions=None):
+        text = text.replace('&lt;', '<').replace('&amp;', '&')
+        if substitutions:
+            for old, new in substitutions.items():
+                text = text.replace(old, new)
     
     def render(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
         return ''.join(self.generate(layout, scope, session))
@@ -94,9 +119,9 @@ class PCData(SubstitutableTextBlock):
     class is seldom needed in practice, because the element classes are
     able to accept XML PCDATA sections as plain strings.
     """
-    def __init__(self, text, escape=False):
+    def __init__(self, text, escape=True):
         if escape:
-            text = escape(text)
+            text = self.escape(text)
         super(PCData, self).__init__(text.split('\n'))
 
 
