@@ -1,7 +1,4 @@
-"""Ancestor classes for XML elements.
-
-These are used internally, and should generally be avoided by users of
-the package.
+"""An ancestor class for XML elements.
 """
 
 from xml.sax.saxutils import escape, unescape
@@ -11,16 +8,15 @@ from _namespace import DocumentScope, BASE_SCOPE
 from _layout import DEFAULT_LAYOUT, SPARTAN_LAYOUT, MINIMAL_LAYOUT
 
 
-
 class Element(TextBlock):
     """An ancestor class for representing well-formed XML elements.
     
-    This provides a means to its subclasses to to add child content, and
-    to represent element attributes as if they were items in a dictionary.
+    This provides a means to add child content, and to represent element
+    attributes as if they were items in a dictionary.
     
-    Users of this package should rarely need to make instances of this class,
-    or even make subclasses directly from it. The only legitimate use
-    is to test to see if an object is an element by using the isinstance()
+    The Element class is designed to be subclassed; users of this package
+    should rarely need to make instances of this class. One common legitimate
+    use is to test to see if an object is an element by using the isinstance()
     and issubclass() built-in functions.
     """
     
@@ -75,24 +71,29 @@ class Element(TextBlock):
         self.add(*contents)
     
     def __setitem__(self, key, value):
+        """Add an attribute to the element.
+        """
         if key.endswith('_'):
             key = key[:-1]
         self._attributes[key] = self.escape(value, {'"': '&quot;'})
     
     def __getitem__(self, key):
+        """Get the value of an attribute.
+        """
         return self.unescape(self._attributes[key], {'&quot;': '"'})
     
     def __delitem__(self, key):
+        """Delete an attribute.
+        """
         del self._attributes[key]
     
     def __call__(self, *contents):
         """An alternate method to add sub-elements.
         
+        See the __init__() documentation for information on what type of
+        contents are acceptable in Element instances.
         
-        See the __init__ documentation for information on what type of
-        contents may be passed here.
-        
-        Since it returns self, this can be used to make the element
+        Since this method returns self, this can be used to make the element
         specification more readable and XML-like, with the attributes listed
         first and sub-elements second. Here is an example (the
         Example class used here being a ContainerElement subclass):
@@ -104,27 +105,43 @@ class Element(TextBlock):
         self.add(*contents)
         return self
     
-    def add(self, *elements):
+    def add(self, *contents):
         """Add any number of objects to the contents of this element.
         
-        See the __init__ documentation for 
+        See the __init__() documentation for information on what type of
+        contents are acceptable in Element instances.
         """
-        for element in elements:
-            if not isinstance(element, TextBlock):
-                element = PCData(str(element))
-            self._contents.append(element)
-            self._content_types.add(self.determine_type(element))
+        for item in contents:
+            if not isinstance(item, TextBlock):
+                item = PCData(str(item))
+            self._contents.append(item)
+            self._content_types.add(self.determine_content_type(item))
     
     def has_key(self, key):
+        """Returns True if the attribute has been set, False otherwise.
+        """
         return self._attributes.has_key()
     
     def items(self):
+        """Return key, value pairs representing all the element's attributes.
+        """
         return self._attributes.items()
     
     def format_attributes(self, scope):
+        """Return a string with all attributes in proper XML format.
+        """
         return ' '.join('%s="%s"' % i for i in self.items())
     
     def determine_scope(self, scope):
+        """Figure out the namespace scoping context.
+        
+        This determines if the current element's namespace is within
+        the scope. If not, it returns an xmlns value that needs to be
+        specified for the element. If so, an empty string is returned.
+        
+        It also figures out what the scope will be for this element's
+        children, and returns that as well.
+        """
         if isinstance(scope, DocumentScope):
             if self.namespace:
                 scope = scope.merge(self.namespace)
@@ -140,12 +157,16 @@ class Element(TextBlock):
             return xmlns, scope
     
     def format_prefix(self):
+        """Return the prefix, if any, to use when generating the element.
+        """
         if self.namespace and self.namespace.__prefix__:
             return self.namespace.__prefix__ + ':'
         else:
             return ''
     
     def format_xmlns(self, namespace):
+        """Return the xmlns value, formatted properly for XML.
+        """
         if not namespace.__name__:
             return ''
         attr_name = 'xmlns'
@@ -169,15 +190,15 @@ class Element(TextBlock):
         """
         return '</%s%s>' % (self.format_prefix(), self.tag_name)
     
-    def determine_type(self, element):
-        if isinstance(element, Element):
+    def determine_content_type(self, item):
+        if isinstance(item, Element):
             return 'element'
-        elif isinstance(element, PreformattedPCData):
+        elif isinstance(item, PreformattedPCData):
             return 'preformatted'
-        elif isinstance(element, PCData):
+        elif isinstance(item, PCData):
             return 'pcdata'
-        elif isinstance(element, CallBack):
-            return self.determine_type(element.return_type)
+        elif isinstance(item, CallBack):
+            return self.determine_type(item.return_type)
         else:
             return('indeterminate')
     
