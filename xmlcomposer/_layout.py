@@ -28,6 +28,9 @@ class Layout(tuple):
     def __repr__(self):
         return '"%s"' % str(self)
     
+    def __setattr__(self, key, value):
+        raise AttributeError('Cannot add attributes to Layout.')
+    
     @property
     def indent_style(self):
         return self[0]
