@@ -10,7 +10,7 @@ __all__ = (
     )
 
 from _document import Document, Template, Comment, \
-    XMLDeclaration, XMLStylesheet DocType, Prolog
+    XMLDeclaration, XMLStylesheet, DocType, Prolog
 
 from _namespace import Namespace, Scope, DocumentScope
 
