@@ -1,17 +1,60 @@
 
-class Layout(object):
+class Layout(tuple):
     """Settings and routines for managing XML document layout.
     """
-    def __init__(self, indent_style='\t', indent_count=0,
+    def __new__(cls, indent_style='\t', indent_count=0,
              line_ending='\n', line_wrap=80):
-        self.indent_style = indent_style
-        self.indent_count = indent_count
-        self.line_ending = line_ending
-        self.line_wrap = line_wrap
-        
-        self.indentation = indent_style * indent_count
-        self.default_wrap = max(48, line_wrap - len(self.indentation)) + 1
-        self.min_wrap = self.default_wrap / 2
+        indentation = indent_style * indent_count
+        default_wrap = max(48, line_wrap - len(indentation))
+        min_wrap = default_wrap / 2
+        return tuple.__new__(cls, (
+            indent_style,
+            indent_count,
+            line_ending,
+            line_wrap,
+            indentation,
+            default_wrap,
+            min_wrap
+            ))
+    
+    def __str__(self):
+        return '<Layout (%s, %s, %s, %s)>' % (
+            repr(self.indent_style),
+            self.indent_count,
+            repr(self.line_ending),
+            self.line_wrap
+            )
+    
+    def __repr__(self):
+        return '"%s"' % str(self)
+    
+    @property
+    def indent_style(self):
+        return self[0]
+    
+    @property
+    def indent_count(self):
+        return self[1]
+    
+    @property
+    def line_ending(self):
+        return self[2]
+    
+    @property
+    def line_wrap(self):
+        return self[3]
+    
+    @property
+    def indentation(self):
+        return self[4]
+    
+    @property
+    def default_wrap(self):
+        return self[5]
+    
+    @property
+    def min_wrap(self):
+        return self[6]
     
     def indent(self):
         if self.indent_style == '':
@@ -49,9 +92,9 @@ class Layout(object):
                 parts.append(self.indentation + line)
             return self.line_ending.join(parts) + self.line_ending
 
-#Standard XML formatting for easy human reading.
+# Standard XML formatting for easy human reading.
 DEFAULT_LAYOUT = Layout()
-#More compact formatting with no indentation.
+# More compact formatting with no indentation.
 SPARTAN_LAYOUT = Layout('', 0, '\n', 0)
 # Smallest possible output.
 MINIMAL_LAYOUT = Layout('', 0, '', 0)
