@@ -9,6 +9,7 @@ from types import FunctionType, MethodType
 from _text import TextBlock, SubstitutableTextBlock
 from _namespace import BASE_SCOPE, DocumentScope
 from _layout import DEFAULT_LAYOUT, SPARTAN_LAYOUT, MINIMAL_LAYOUT
+from _element import Element, ProcessingInstruction
 
 class Document(TextBlock):
     """A class used to generate an entire document.
@@ -69,17 +70,19 @@ class Comment(TextBlock):
         super(Comment, self).__init__(text.split('\n'))
 
 
-class XMLDeclaration(TextBlock):
+
+class XMLDeclaration(ProcessingInstruction):
     """A line in the prolog to specify xml version, encoding, etc.
-    """
-    def __init__(self, **attributes):
-        attributes = {'version': '1.0', 'encoding': 'UTF-8'}
-        attributes.update(attributes)
-        self.line =  '<?xml %s ?>' % \
-            ' '.join('%s="%s"' % i for i in attributes.items())
     
-    def generate(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
-        yield layout(self.line)
+    Note: the XML declaration is technically not a processing instruction,
+    but the difference is not relevant for this use and the format is close
+    enough to treat it as one here.
+    """
+    default_attributes = {'version': '1.0', 'encoding': 'UTF-8'}
+    tag_name = 'xml'
+    
+    def __init__(self, **attributes):
+        super(XMLDeclaration, self).__init__(**attributes)
 
 
 class DocType(TextBlock):
@@ -101,7 +104,4 @@ class DocType(TextBlock):
     def generate(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
         yield layout(self.line)
 
-
-# Either finish this or decide not to support it.
-#class ProcessingInstruction(TextBlock): pass
 

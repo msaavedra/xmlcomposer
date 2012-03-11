@@ -57,7 +57,7 @@ class Element(TextBlock):
                 if not issubclass(base, Element):
                     # The subclass is using multiple inheritance. Skip.
                     continue
-                if base is Element:
+                if base in (Element, ProcessingInstruction) :
                     self.tag_name = self.__class__.__name__.lower()
                 else:
                     self.tag_name = base.__name__.lower()
@@ -198,7 +198,7 @@ class Element(TextBlock):
         elif isinstance(item, PCData):
             return 'pcdata'
         elif isinstance(item, CallBack):
-            return self.determine_type(item.return_type)
+            return self.determine_content_type(item.return_type)
         else:
             return('indeterminate')
     
@@ -260,4 +260,22 @@ class Element(TextBlock):
             for line in element.generate(layout.indent(), inner_scope, session):
                 yield line
         yield layout(self.close_tag(scope))
+
+
+class ProcessingInstruction(Element):
+    """
+    """
+    preformatted = True
+    
+    def open_tag(self, xmlns, scope):
+        attribs = self.format_attributes(scope)
+        if attribs:
+            attribs = ' %s' % attribs
+        
+        return '<?%s%s' % (self.tag_name, attribs)
+    
+    def close_tag(self, scope):
+        """Return a string representing the closing version of the tag.
+        """
+        return '?>'
 

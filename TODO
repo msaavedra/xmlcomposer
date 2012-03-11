@@ -2,8 +2,6 @@
 * Write real tests.
 * Add documentation/tutorial
 * Add copyright/legal information in each file as needed.
-* Add a ProcessingInstruction class
 * Work out Django compatibility
-* Add formats: HTML5, RSS, etc.
 * Cache expiration for schema loader.
 

@@ -18,4 +18,4 @@ from _layout import Layout, DEFAULT_LAYOUT, SPARTAN_LAYOUT, MINIMAL_LAYOUT
 
 from _text import PCData, PreformattedPCData, CData, CallBack
 
-from _element import Element
+from _element import Element, ProcessingInstruction
