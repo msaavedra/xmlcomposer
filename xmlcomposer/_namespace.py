@@ -59,16 +59,17 @@ class Scope(frozenset):
         return DocumentScope(*tuple(self))
 
 class DocumentScope(Scope):
-    
+    """An optional specification of the namespaces for an entire document.
+    """
     def merge(self, *args):
         """Return a new scope merging with additional namespaces.
         
         Note that this creates a regular Scope, not a DocumentScope.
         """
-        return Scope(*tuple(self.union(args)))
+        return Scope(*self.union(args))
     
     def make_regular_scope(self):
-        return Scope(*tuple(self))
+        return Scope(*self)
         
 
 # An empty scope to use as a default.
