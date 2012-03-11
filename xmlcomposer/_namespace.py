@@ -58,6 +58,7 @@ class Scope(frozenset):
     def make_document_scope(self):
         return DocumentScope(*tuple(self))
 
+
 class DocumentScope(Scope):
     """An optional specification of the namespaces for an entire document.
     """
