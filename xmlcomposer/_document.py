@@ -70,7 +70,6 @@ class Comment(TextBlock):
         super(Comment, self).__init__(text.split('\n'))
 
 
-
 class XMLDeclaration(ProcessingInstruction):
     """A line in the prolog to specify xml version, encoding, etc.
     
@@ -80,6 +79,13 @@ class XMLDeclaration(ProcessingInstruction):
     """
     default_attributes = {'version': '1.0', 'encoding': 'UTF-8'}
     tag_name = 'xml'
+    
+    def __init__(self, **attributes):
+        super(XMLDeclaration, self).__init__(**attributes)
+
+
+class XMLStylesheet(ProcessingInstruction):
+    tag_name = 'xml-stylesheet'
     
     def __init__(self, **attributes):
         super(XMLDeclaration, self).__init__(**attributes)
