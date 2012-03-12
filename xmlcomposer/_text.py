@@ -17,6 +17,9 @@ class TextBlock(object):
     its subclasses.
     """
     
+    # If preformatted, line break, spaces and tabs will be preserved.
+    preformatted = False
+    
     # A regular expression for finding unescaped non-entity ampersands.
     _amp_regex = re.compile(r'&(?P<suffix>([^;&\s]{0,32}(?=(&|\s|\Z))))')
     
@@ -26,7 +29,7 @@ class TextBlock(object):
         self._contents = lines
     
     def __str__(self):
-        return ''.join(self.generate())
+        return ''.join(self.generate()).rstrip()
     
     @classmethod
     def escape(cls, text, substitutions=None):
@@ -122,16 +125,9 @@ class PCData(SubstitutableTextBlock):
     def __init__(self, text, escape=True):
         if escape:
             text = self.escape(text)
+        if '\t' in text or '\n' in text or '   ' in text:
+            self.preformatted = True
         super(PCData, self).__init__(text.split('\n'))
-
-
-class PreformattedPCData(SubstitutableTextBlock):
-    """
-    """
-    preformatted = True
-    
-    def __init__(self, lines):
-        super(PreformattedPCData, self).__init__(lines)
 
 
 class CData(SubstitutableTextBlock):
@@ -139,6 +135,7 @@ class CData(SubstitutableTextBlock):
     
     Like SubstitutableTextBlock, but the arg is a single string.
     """
+    preformatted = True
     def generate(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
         yield layout('<![CDATA[')
         for line in super(Cdata, self).generate(layout, session, scope):

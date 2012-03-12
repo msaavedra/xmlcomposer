@@ -193,7 +193,7 @@ class Element(TextBlock):
     def determine_content_type(self, item):
         if isinstance(item, Element):
             return 'element'
-        elif isinstance(item, PreformattedPCData):
+        elif item.preformatted == True:
             return 'preformatted'
         elif isinstance(item, PCData):
             return 'pcdata'
