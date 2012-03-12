@@ -3,7 +3,7 @@
 
 from xml.sax.saxutils import escape, unescape
 
-from _text import TextBlock, PCData, PreformattedPCData, CallBack
+from _text import TextBlock, PCData, CallBack
 from _namespace import DocumentScope, BASE_SCOPE
 from _layout import DEFAULT_LAYOUT, SPARTAN_LAYOUT, MINIMAL_LAYOUT
 
@@ -193,7 +193,7 @@ class Element(TextBlock):
     def determine_content_type(self, item):
         if isinstance(item, Element):
             return 'element'
-        elif item.preformatted == True:
+        elif item.preformatted:
             return 'preformatted'
         elif isinstance(item, PCData):
             return 'pcdata'
@@ -203,11 +203,9 @@ class Element(TextBlock):
             return('indeterminate')
     
     def generate(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
-        if hasattr(self, 'preformatted'):
-            return self._generate_preformatted(layout, scope, session)
         if not self._content_types:
             return self._generate_empty(layout, scope, session)
-        elif 'preformatted' in self._content_types:
+        elif self.preformatted or 'preformatted' in self._content_types:
             return self._generate_preformatted(layout, scope, session)
         elif 'pcdata' in self._content_types \
                 and 'indeterminate' not in self._content_types:

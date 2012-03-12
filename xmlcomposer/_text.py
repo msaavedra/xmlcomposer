@@ -125,9 +125,11 @@ class PCData(SubstitutableTextBlock):
     def __init__(self, text, escape=True):
         if escape:
             text = self.escape(text)
+        
+        super(PCData, self).__init__((text,))
+        
         if '\t' in text or '\n' in text or '   ' in text:
             self.preformatted = True
-        super(PCData, self).__init__(text.split('\n'))
 
 
 class CData(SubstitutableTextBlock):
