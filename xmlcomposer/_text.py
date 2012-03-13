@@ -78,26 +78,27 @@ class SubstitutableTextBlock(TextBlock):
         super(SubstitutableTextBlock, self).__init__(lines)
         self._substitutions = []
     
-    def substitute(self, flag, callback, layout=SPARTAN_LAYOUT):
+    def substitute(self, flag, callback):
         """Set up a substitution which will occur at generation time.
         
         The flag argument indicates a marker string in the contents
         that is substituted with new contents. The callback arg is a function
         or method that can build the new content. It must accept a single arg
         containing session information, and return a single instance of
-        TextBlock or a subclass thereof. The layout arg is a Layout object
-        that should be used to lay out the output of the callback function.
+        TextBlock or a subclass thereof.
         """
         if isinstance(callback, CallBack):
             callback = callback.func
-        def yield_substituted_lines(contents, scope, session):
+        def yield_substituted_lines(contents, layout, scope, session):
             """A generator-function closure for handling substitutions.
             """
             for line in contents:
                 parts = line.split(flag)
                 new_line = parts.pop(0)
                 for part in parts:
-                    substitute = callback(session).generate(layout, scope, session)
+                    substitute = callback(session).generate(
+                        layout, scope, session
+                        )
                     new_line += ''.join(substitute).strip()
                     new_line += part
                 yield new_line
@@ -110,7 +111,7 @@ class SubstitutableTextBlock(TextBlock):
         """
         contents = self._contents
         for substitution in self._substitutions:
-            contents = substitution(contents, scope, session)
+            contents = substitution(contents, layout, scope, session)
         for line in contents:
             yield layout(line)
 
