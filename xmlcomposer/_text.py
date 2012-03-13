@@ -124,13 +124,13 @@ class PCData(SubstitutableTextBlock):
     able to accept XML PCDATA sections as plain strings.
     """
     def __init__(self, text, escape=True):
-        if escape:
-            text = self.escape(text)
-        
-        super(PCData, self).__init__((text,))
-        
+        if isinstance(text, tuple) or isinstance(text, list):
+            text = '\n'.join(text)
         if '\t' in text or '\n' in text or '   ' in text:
             self.preformatted = True
+        if escape:
+            text = self.escape(text)
+        super(PCData, self).__init__(text.split('\n'))
 
 
 class CData(SubstitutableTextBlock):
@@ -147,9 +147,20 @@ class CData(SubstitutableTextBlock):
 
 
 class CallBack(TextBlock):
-    """
+    """A section whose contents are determined dynamically at generation-time.
     """
     def __init__(self, func, return_type=None):
+        """Initialize the callback.
+        
+        The func arg can be any callable object that accepts a single arg
+        that holds session data and returns a TextBlock or any of its
+        subclasses.
+        
+        The return_type arg allows the user to optionally specify the class
+        which will be returned by the callback (ie an Element, PCData, etc.).
+        This allows a parent element to do a better job of laying out its
+        content.
+        """
         self.func = func
         if isinstance(return_type, CallBack):
             raise Exception()
