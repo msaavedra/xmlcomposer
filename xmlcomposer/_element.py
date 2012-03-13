@@ -191,10 +191,10 @@ class Element(TextBlock):
         return '</%s%s>' % (self.format_prefix(), self.tag_name)
     
     def determine_content_type(self, item):
-        if isinstance(item, Element):
-            return 'element'
-        elif item.preformatted:
+        if item.preformatted:
             return 'preformatted'
+        elif isinstance(item, Element):
+            return 'element'
         elif isinstance(item, PCData):
             return 'pcdata'
         elif isinstance(item, CallBack):
