@@ -55,11 +55,19 @@ class Template(SubstitutableTextBlock):
     well-formedness. You can make substitutions like in the
     SubstitutableTextBlock on which it is based.
     """
-    def __init__(self, file_name):
-        f = open(file_name, 'r')
-        lines = f.readlines()
-        f.close()
-        super(Template, self).__init__(self, lines)
+    def __init__(self, file_name, iterator=False):
+        self.file_name = file_name
+        if iterator:
+            contents = self
+        else:
+            f = (file_name, 'r')
+            contents = f.readlines()
+            f.close()
+        super(Template, self).__init__(self, contents)
+    
+    def __iter__(self):
+        with open(self.file_name, 'r') as f:
+            return iter(f)
 
 
 class Comment(TextBlock):
