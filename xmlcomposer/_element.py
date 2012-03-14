@@ -40,6 +40,56 @@ class Element(TextBlock):
         name that shadows a builtin function (i.e. the "id" attribute). We 
         therefore follow the PEP 8 standard and use a trailing underscores 
         ("class_" or "id_"). The proper name will be substituted automatically.
+        
+        Here is the most basic example:
+        
+        >>> import xmlcomposer
+        >>> e = Element('This is a test.', id='most_basic')
+        >>> e.tag_name = 'example'
+        >>> print e
+        <example id="most_basic">This is a test.</example>
+        
+        This is not the most convenient usage, though. More typical usage
+        is like this:
+        
+        >>> class Example(xmlcomposer.Element): pass
+        >>> class Section(xmlcomposer.Element): pass
+        >>> e = Example(id='typical_usage')(
+        ...     Section('This is the first section in the example.'),
+        ...     Section('This is a second.')
+        ... )
+        >>> print e
+        <example id="typical_usage">
+        	<section>This is the first section in the example.</section>
+        	<section>This is a second.</section>
+        </example>
+        
+        The Element class tries to do the most convenient thing when
+        automatically setting tag_name in subclasses. If you are inheriting
+        directly from Element, it will set the tag_name to a lowercase version
+        of the subclass name. All grandchild, great-grandchild, and further
+        descendent classes will keep the child tag_name. If this is not what
+        you want, you can always set tag_name explicitly.
+        
+        You can also explicitly set default_attributes.
+        
+        >>> class Example(xmlcomposer.Element)
+        >>> class Section(xmlcomposer.Element): pass
+        >>> class MarkedSection(Section):
+        ...     default_attributes = {'class': 'marked'}
+        >>> class FinalSection(Section):
+        ...     tag_name = 'finalSection' # needed for camelCase
+        >>> e = Example(id='typical_usage')(
+        ...     Section('This is the first section in the example.'),
+        ...     MarkedSection('This section is marked by default'),
+        ...     FinalSection('This is the last section.')
+        ... )
+        >>> print e
+        <example id="typical_usage">
+        	<section>This is the first section in the example.</section>
+        	<section class="marked">This section is marked by default</section>
+        	<finalSection>This is the last section.</finalSection>
+        </example>
         """
         self._attributes = self.default_attributes.copy()
         
@@ -128,12 +178,12 @@ class Element(TextBlock):
         return self._attributes.items()
     
     def format_attributes(self, scope):
-        """Return a string with all attributes in proper XML format.
+        """An internal method to build attributes in proper XML format.
         """
         return ' '.join('%s="%s"' % i for i in self.items())
     
     def determine_scope(self, scope):
-        """Figure out the namespace scoping context.
+        """An internal method to figure out the namespace scoping context.
         
         This determines if the current element's namespace is within
         the scope. If not, it returns an xmlns value that needs to be
@@ -157,7 +207,7 @@ class Element(TextBlock):
             return xmlns, scope
     
     def format_prefix(self):
-        """Return the prefix, if any, to use when generating the element.
+        """An internal method to get the prefix, if any, to use when generating.
         """
         if self.namespace and self.namespace.__prefix__:
             return self.namespace.__prefix__ + ':'
@@ -165,7 +215,7 @@ class Element(TextBlock):
             return ''
     
     def format_xmlns(self, namespace):
-        """Return the xmlns value, formatted properly for XML.
+        """An internal method to get a specially-handled xmlns attribute.
         """
         if not namespace.__name__:
             return ''
@@ -175,7 +225,7 @@ class Element(TextBlock):
         return ' %s="%s"' % (attr_name, namespace.__name__)
     
     def open_tag(self, xmlns, scope):
-        """Return a string representing the opening version of the tag.
+        """An internal method to get the opening version of the tag.
         """
         attribs = self.format_attributes(scope)
         if attribs:
@@ -186,11 +236,13 @@ class Element(TextBlock):
             )
     
     def close_tag(self, scope):
-        """Return a string representing the closing version of the tag.
+        """An internal method to get the closing version of the tag.
         """
         return '</%s%s>' % (self.format_prefix(), self.tag_name)
     
     def determine_content_type(self, item):
+        """An internal method to get a description of an arbitrary item.
+        """
         if item.preformatted:
             return 'preformatted'
         elif isinstance(item, Element):
@@ -203,6 +255,8 @@ class Element(TextBlock):
             return('indeterminate')
     
     def generate(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
+        """Return a generator that produces XML line-by-line for the element.
+        """
         if not self._content_types:
             return self._generate_empty(layout, scope, session)
         elif self.preformatted or 'preformatted' in self._content_types:
