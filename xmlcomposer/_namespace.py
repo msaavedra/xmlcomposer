@@ -8,6 +8,7 @@ class Namespace(ModuleType):
         super(Namespace, self).__init__(name)
         super(Namespace, self).__setattr__('__prefix__', prefix)
         del self.__doc__
+        
         if module:
             if isinstance(module, str):
                 module = __import__(module, fromlist=[module])

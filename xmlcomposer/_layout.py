@@ -1,6 +1,30 @@
+"""Tools for laying out an XML document.
+
+This includes handling indentation, line endings and text wrapping.
+The module has a Layout class that lets you make custom layouts. It also
+contains three pre-built layouts that cover most use cases:
+
+DEFAULT_LAYOUT: This indents one tab character for each level of nesting,
+uses a newline character at the end of each line, and wraps text at the
+80th column. This is the best option to use to make a document human-readable.
+
+SPARTAN_LAYOUT: This does not do any indenting or text-wrapping. However, it
+places a newline at the end of each line. This is still human-readable with
+some effort, and results in a smaller document.
+
+MINIMAL_LAYOUT: This option does not add any unneeded characters, creating
+the smallest possible document. It is very difficult for humans to read.
+
+Note that Layout settings are not absolute; element classes use them at
+the discretion of their programmers. They are, for instance, ignored completely
+by preformatted elements.
+"""
 
 class Layout(tuple):
     """Settings and routines for managing XML document layout.
+    
+    Note that instances are designed to be immutable, though a clever but
+    unwise programmer can circumvent this.
     """
     def __new__(cls, indent_style='\t', indent_count=0,
              line_ending='\n', line_wrap=80):
@@ -72,7 +96,6 @@ class Layout(tuple):
         elif wrap == False or self.line_wrap == 0 or self.line_ending == '':
             return self.indentation + line + self.line_ending
         else:
-            # this section is ugly and inefficient, but effective.
             parts = []
             while len(line) > self.default_wrap:
                 index = self.default_wrap

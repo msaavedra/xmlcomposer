@@ -30,9 +30,9 @@ class Element(TextBlock):
         
         Any contents you wish to put inside this element can be passed as
         positional args. If such args are not descended from TextBlock,
-        they will be converted to a strings, then wrapped in a PCData
+        they will be converted to strings, then wrapped in a PCData
         instance. This is useful to pass plain strings, or any object where
-        you have defined its __str__ method to return something useful.
+        you have defined its __str__() method to return something useful.
         
         You can list any attributes of the element as keyword arguments.
         Note that python reserved words cannot be used as attribute
@@ -41,27 +41,32 @@ class Element(TextBlock):
         therefore follow the PEP 8 standard and use a trailing underscores 
         ("class_" or "id_"). The proper name will be substituted automatically.
         
-        Here is the most basic example:
+        Here is the most basic example that shows the gist of the class:
         
-        >>> import xmlcomposer
-        >>> e = Element('This is a test.', id='most_basic')
+        >>> e = Element('Hello World!', class_='basic')
         >>> e.tag_name = 'example'
+        >>> e['id'] = 'first'
+        >>> e.add(' This is a test.')
         >>> print e
-        <example id="most_basic">This is a test.</example>
+        <example class="basic" id="first">Hello World! This is a test.</example>
         
         This is not the most convenient usage, though. More typical usage
-        is like this:
+        is to create subclasses of Element, and add contents using the
+        __call__() method (see its documentation for more information)
         
-        >>> class Example(xmlcomposer.Element): pass
-        >>> class Section(xmlcomposer.Element): pass
+        Here is a more realistic example:
+        
+        >>> class Example(Element): pass
+        >>> class Section(Element): pass
+        >>>
         >>> e = Example(id='typical_usage')(
         ...     Section('This is the first section in the example.'),
         ...     Section('This is a second.')
         ... )
         >>> print e
         <example id="typical_usage">
-        	<section>This is the first section in the example.</section>
-        	<section>This is a second.</section>
+            <section>This is the first section in the example.</section>
+            <section>This is a second.</section>
         </example>
         
         The Element class tries to do the most convenient thing when
@@ -71,30 +76,39 @@ class Element(TextBlock):
         descendent classes will keep the child tag_name. If this is not what
         you want, you can always set tag_name explicitly.
         
-        You can also explicitly set default_attributes.
+        You can also explicitly name default attritbutes of an Element subclass
+        by specifying a default_attributes dictionary in the subclass.
         
-        >>> class Example(xmlcomposer.Element)
-        >>> class Section(xmlcomposer.Element): pass
+        Here is a continuation of the previous example using new features:
+        
         >>> class MarkedSection(Section):
         ...     default_attributes = {'class': 'marked'}
+        >>>
         >>> class FinalSection(Section):
         ...     tag_name = 'finalSection' # needed for camelCase
-        >>> e = Example(id='typical_usage')(
-        ...     Section('This is the first section in the example.'),
+        >>>
+        >>> e.add(
         ...     MarkedSection('This section is marked by default'),
         ...     FinalSection('This is the last section.')
         ... )
         >>> print e
         <example id="typical_usage">
-        	<section>This is the first section in the example.</section>
-        	<section class="marked">This section is marked by default</section>
-        	<finalSection>This is the last section.</finalSection>
+            <section>This is the first section in the example.</section>
+            <section>This is a second.</section>
+            <section class="marked">This section is marked by default</section>
+            <finalSection>This is the last section.</finalSection>
         </example>
+        
+        A real XML document, of course, requires many Element subclasses.
+        Creating those classes can be cumbersome. Therefore, there are means
+        to import elements from several prebuilt XML flavors in the
+        formats subpackage. You can also create elements wholesale from
+        several types of schema using the schema subpackage.
         """
         self._attributes = self.default_attributes.copy()
         
         # Don't update() the dictionary directly because we process the
-        # attributes using our the __setitem__() method.
+        # attributes using the __setitem__() method.
         for key, value in attributes.items():
             self[key] = value
         
@@ -148,6 +162,7 @@ class Element(TextBlock):
         first and sub-elements second. Here is an example (the
         Example class used here being a ContainerElement subclass):
         
+        >>> class Example(Element): pass
         >>> x = Example(id="test")('This is a test.')
         >>> print x
         <example id="test">This is a test.</example>
@@ -180,7 +195,7 @@ class Element(TextBlock):
     def format_attributes(self, scope):
         """An internal method to build attributes in proper XML format.
         """
-        return ' '.join('%s="%s"' % i for i in self.items())
+        return ' '.join('%s="%s"' % i for i in sorted(self.items()))
     
     def determine_scope(self, scope):
         """An internal method to figure out the namespace scoping context.
@@ -283,7 +298,7 @@ class Element(TextBlock):
             if isinstance(element, CallBack):
                 element = element.func(session)
             for line in element.generate(SPARTAN_LAYOUT, inner_scope, session):
-                yield line.rstrip()
+                yield line
         yield layout(self.close_tag(scope)).lstrip()
     
     def _generate_flat(self, layout, scope, session):

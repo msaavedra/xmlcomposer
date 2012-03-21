@@ -15,6 +15,12 @@ class TextBlock(object):
     The TextBlock does not guarantee that its contents are well-formed.
     It generally should not be used directly. Instead use one of
     its subclasses.
+    
+    A very basic example:
+    >>> test = TextBlock(('Hello World!', 'This is a test.'))
+    >>> print test
+    Hello World!
+    This is a test.
     """
     
     # If preformatted, line break, spaces and tabs will be preserved.
@@ -33,6 +39,33 @@ class TextBlock(object):
     
     @classmethod
     def escape(cls, text, substitutions=None):
+        """This is a routine to process special characters gracefully.
+        
+        The only truly reserved characters in XML are the ampersand and
+        the less-than sign. These are substituted with the appropriate XML
+        entities (&amp; and &lt; respectively).
+        
+        This routine recognizes XML entities in the text and does not
+        substitute for their leading ampersand.
+        
+        The text argument is a string from which you wish to handle the special
+        characters.
+        
+        The substitutions argument should be a dictionary whose
+        key/value pairs hold, respectively, the characters needing to be
+        substituted, and their replacement.
+        
+        Examples:
+        
+        >>> print TextBlock.escape('Hello & Goodbye')
+        Hello &amp; Goodbye
+        
+        >>> print TextBlock.escape('Hello &amp; Goodbye')
+        Hello &amp; Goodbye
+        
+        >>> print TextBlock.escape('Double quotes "escaped."', {'"': '&quot;'})
+        Double quotes &quot;escaped.&quot;
+        """
         if substitutions:
             for old, new in substitutions.items():
                 text = text.replace(old, new)
@@ -41,28 +74,66 @@ class TextBlock(object):
         return text
     
     @classmethod
-    def __replace_on_match(self, match):
+    def __replace_on_match(cls, match):
         return '&amp;'+ match.group('suffix')
     
     @classmethod
     def unescape(cls, text, substitutions=None):
+        """A routine to convert escaped strings to their original form.
+        
+        By default, the &amp; and &lt; substrings are converted to & and <
+        respectively. Additional conversions can be specified by passing
+        a dictionary as the substitutions arg.
+        """
         text = text.replace('&lt;', '<').replace('&amp;', '&')
         if substitutions:
             for old, new in substitutions.items():
                 text = text.replace(old, new)
     
     def render(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
+        """Return the entire generated block as a string.
+        
+        The arguments are identical to the generate() method.
+        """
         return ''.join(self.generate(layout, scope, session))
     
     def generate(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
-        """Generate a section of XML.
+        """Return a generator that creates a section of XML line-by-line.
         
-        The args for this method do nothing and are not used; they are here
-        purely for compatibility with more feature-rich subclasses.
+        This method is the most fundamental part of TextBlock and its
+        subclasses. All other built-in output methods use it, and any
+        custom-designed output methods should too.
         
-        This yields the contents of the xml block one line at a time.
-        When subclassing TextBlock, this method should almost certainly be
-        overridden.
+        This is a very frequently overridden method because different
+        subclasses have different generation strategies. Very often, 
+        TextBlock subclass instances are deeply nested within other TextBlock
+        subclass instances, and their generate() methods are called
+        automatically by their parent instance. Thus, when
+        overriding, subclasses MUST accept the same arguments, even
+        if some of the args will not be used, or make no sense in that
+        class's context. However, different default values can be used
+        if appropriate.
+        
+        Also, generate() is designed to be side-effect free, with the possible
+        exception of possible side-effects created by Callbacks outside the
+        control of the TextBlock. This is so that TextBlocks can be created
+        once, then used many times in different contexts, in many different
+        threads, without being altered. Subclasses are STRONGLY ENCOURAGED to
+        maintain the side-effect-free design.
+        
+        Possible arguments (all of which are optional):
+        
+        The layout arg should be a Layout instance with settings for handling
+        indentation, etc.
+        
+        The scope arg contains a Scope instance that contains the namespaces
+        available in the context of the block's place within a document.
+        
+        The session arg may contain any data particular to the session
+        for which the text is being generated. It is passed to callbacks
+        so they can create appropriate content. This argument is completely
+        free-form, programmers can use any type of object they want, as
+        long as their Callbacks are capable of using it.
         """
         for line in self._contents:
             yield layout(line)
@@ -71,8 +142,8 @@ class TextBlock(object):
 class SubstitutableTextBlock(TextBlock):
     """An text block with support for text substitutions at generation-time.
     
-    Like the TextBlock class, this has more useful subclasses and should
-    generally not be used directly
+    Like the TextBlock class from which it descends, this has more useful
+    subclasses and should generally not be used directly
     """
     def __init__(self, lines):
         super(SubstitutableTextBlock, self).__init__(lines)
@@ -82,13 +153,13 @@ class SubstitutableTextBlock(TextBlock):
         """Set up a substitution which will occur at generation time.
         
         The flag argument indicates a marker string in the contents
-        that is substituted with new contents. The callback arg is a function
-        or method that can build the new content. It must accept a single arg
-        containing session information, and return a single instance of
-        TextBlock or a subclass thereof.
+        that is substituted with new contents. The callback arg should be a
+        Callback instance, though any callable object such as a function or
+        method will also work. It must build and return the new content that
+        replaces the flag. The callback must accept a single arg containing
+        session information, and return a single instance of TextBlock or
+        a subclass thereof.
         """
-        if isinstance(callback, CallBack):
-            callback = callback.func
         def yield_substituted_lines(contents, layout, scope, session):
             """A generator-function closure for handling substitutions.
             """
@@ -134,20 +205,46 @@ class PCData(SubstitutableTextBlock):
 
 
 class CData(SubstitutableTextBlock):
-    """A section of unparsed character data.
+    """A section of unparsed character data. Each arg is an individial line.
     
-    Like SubstitutableTextBlock, but the arg is a single string.
+    Example:
+    
+    >>> c = CData(
+    ...     'This is a section of unparsed character data.',
+    ...     'Contents must be preformatted by the user.',
+    ... )
+    >>> print c
+    <![CDATA[
+    This is a section of unparsed character data.
+    Contents must be preformatted by the user.
+    ]]>
     """
     preformatted = True
+    
+    def __init__(self, *lines):
+        super(CData, self).__init__(lines)
+    
     def generate(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
         yield layout('<![CDATA[')
-        for line in super(Cdata, self).generate(layout, session, scope):
+        for line in super(CData, self).generate(layout, session, scope):
             yield line
         yield layout(']]>')
 
 
 class CallBack(TextBlock):
     """A section whose contents are determined dynamically at generation-time.
+    
+    Example:
+    
+    >>> def get_name(session):
+    ...     return PCData(session['name'])
+    >>> 
+    >>> c = CallBack(get_name, return_type=PCData)
+    >>> e = PCData('Hello %NAME%!').substitute('%NAME%', c)
+    >>> print e.render(session={'name': 'Alice'})
+    Hello Alice!
+    >>> print e.render(session={'name': 'Bob'})
+    Hello Bob!
     """
     def __init__(self, func, return_type=None):
         """Initialize the callback.
@@ -160,11 +257,15 @@ class CallBack(TextBlock):
         which will be returned by the callback (ie an Element, PCData, etc.).
         This allows a parent element to do a better job of laying out its
         content.
+        
         """
         self.func = func
         if isinstance(return_type, CallBack):
             raise Exception()
         self.return_type = return_type
+    
+    def __call__(self, session):
+        return self.func(session)
     
     def generate(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
         return self.func(session).generate(layout, scope, session)
