@@ -7,11 +7,30 @@ __all__ = (
     '_layout',
     '_namespace',
     '_text',
+    'Document',
+    'Template',
+    'Comment',
+    'XMLDeclaration',
+    'XMLStylesheet',
+    'DocType',
+    'Prolog',
+    'Element',
+    'ProcessingInstruction',
+    'Layout',
+    'DEFAULT_LAYOUT',
+    'SPARTAN_LAYOUT',
+    'MINIMAL_LAYOUT',
+    'Namespace',
+    'Scope',
+    'DocumentScope',
+    'PCData',
+    'CData',
+    'CallBack',
     )
 
 # The submodules with a leading underscore are not meant to be imported
 # directly by package users. They are there only to improve code clarity
-# and ease of development. Import all relevant objects directly into the
+# and ease of development. We import all relevant objects directly into the
 # base package namespace
 
 from _document import Document, Template, Comment, \
@@ -29,7 +48,7 @@ from _text import PCData, CData, CallBack
 def _reload():
     """A routine to facilitate reloading all the objects in this package.
     
-    This is an ugly hack, and intended only for package developers.
+    This is an ugly hack, and intended to be used only by package developers.
     """
     import _document
     reload(_document)
@@ -69,4 +88,3 @@ def _reload():
     CData = _text.PCData
     CallBack = _text.CallBack
 
-    
