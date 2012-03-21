@@ -22,7 +22,7 @@ class Document(TextBlock):
         if prolog:
             self.prolog = prolog
         else:
-            prolog = Prolog()
+            self.prolog = Prolog()
     
     def __str__(self):
         return ''.join(self.generate(DEFAULT_LAYOUT))
