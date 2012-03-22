@@ -57,7 +57,7 @@ class Scope(frozenset):
         return self.union(args)
     
     def make_document_scope(self):
-        return DocumentScope(*tuple(self))
+        return DocumentScope(*self)
 
 
 class DocumentScope(Scope):
