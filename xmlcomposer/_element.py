@@ -130,7 +130,7 @@ class Element(TextBlock):
         self._contents = []
         self._content_types = set()
         
-        # Fill our contents. Don't access the list directly, but use our add()
+        # Fill the contents. Don't access the list directly, but use the add()
         # method, which validates and processes them.
         self.add(*contents)
     
