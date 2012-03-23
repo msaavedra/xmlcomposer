@@ -47,8 +47,6 @@ def export(schema_location, namespace_id='', export_path=None):
             f.close()
 
 
-class SchemaError(Exception): pass
-
 class SchemaDocument(object):
     
     def __init__(self, location, base=''):
@@ -180,10 +178,7 @@ class XsdParser(object):
             new_class = type(class_name, (Element,), attribs)
             setattr(namespace, class_name, new_class)
 
+
 class RngParser(XsdParser):
     uri = 'http://relaxng.org/ns/structure/1.0'
-
-
-
-
 
