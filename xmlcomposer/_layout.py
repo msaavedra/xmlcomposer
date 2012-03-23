@@ -20,12 +20,26 @@ the discretion of their programmers. They are, for instance, ignored completely
 by preformatted elements.
 """
 
+from operator import itemgetter
+
 class Layout(tuple):
-    """Settings and routines for managing XML document layout.
+    """Settings and routines for managing the layout of generated XML.
     
-    Note that instances are designed to be immutable, though a clever but
-    unwise programmer can circumvent this.
+    Instances of this class are used soley as arguments to the TextBlock
+    generate() method and its kin, where lack of side-effects is a design goal.
+    Therefore, Layout instances are designed to be immutable, though a clever
+    but unwise programmer may be able to circumvent this.
     """
+    __slots__ = () # save space used by __dict__.
+    
+    indent_style = property(itemgetter(0))
+    indent_count = property(itemgetter(1))
+    line_ending = property(itemgetter(2))
+    line_wrap = property(itemgetter(3))
+    indentation = property(itemgetter(4))
+    default_wrap = property(itemgetter(5))
+    min_wrap = property(itemgetter(6))
+    
     def __new__(cls, indent_style='\t', indent_count=0,
              line_ending='\n', line_wrap=80):
         indentation = indent_style * indent_count
@@ -53,35 +67,7 @@ class Layout(tuple):
         return '"%s"' % str(self)
     
     def __setattr__(self, key, value):
-        raise AttributeError('Cannot add attributes to Layout.')
-    
-    @property
-    def indent_style(self):
-        return self[0]
-    
-    @property
-    def indent_count(self):
-        return self[1]
-    
-    @property
-    def line_ending(self):
-        return self[2]
-    
-    @property
-    def line_wrap(self):
-        return self[3]
-    
-    @property
-    def indentation(self):
-        return self[4]
-    
-    @property
-    def default_wrap(self):
-        return self[5]
-    
-    @property
-    def min_wrap(self):
-        return self[6]
+        raise AttributeError('Cannot set attributes of Layout object.')
     
     def indent(self):
         if self.indent_style == '':
