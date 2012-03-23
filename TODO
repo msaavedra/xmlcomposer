@@ -1,7 +1,7 @@
 
-* Write real tests.
-* Add documentation/tutorial
-* Add copyright/legal information in each file as needed.
+* Finish doctest-compatible docstrings.
+* Write unit tests for internal-only code.
+* Create utility script that generates documentation html from docstrings.
 * Work out Django compatibility
 * Cache expiration for schema loader.
 

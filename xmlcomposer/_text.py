@@ -1,7 +1,7 @@
-"""Ancestor class for nearly all objects in the package.
+# Copyright (c) 1999, 2012 Michael Saavedra
+# This file may be redistributed under the terms of the GNU LPGL v. 3 or later.
 
-This used internally, and should generally be avoided by users of
-the package.
+"""Classes for adding arbitrary text to XML documents.
 """
 
 import re

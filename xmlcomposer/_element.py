@@ -1,3 +1,6 @@
+# Copyright (c) 1999, 2012 Michael Saavedra
+# This file may be redistributed under the terms of the GNU LPGL v. 3 or later.
+
 """An ancestor class for XML elements.
 """
 
