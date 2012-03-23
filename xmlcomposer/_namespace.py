@@ -47,9 +47,23 @@ class Namespace(ModuleType):
 
 class Scope(frozenset):
     """The collection of namespaces that are valid in an element's context.
+    
+    Instances of this class are used soley as arguments to the TextBlock
+    generate() method and its kin, where lack of side-effects is a design goal.
+    Therefore, Scope instances are designed to be immutable, though a clever
+    but unwise programmer may be able to circumvent this.
     """
     def __new__(cls, *args):
         return super(Scope, cls).__new__(cls, args)
+    
+    def __str__(self):
+        return "%s('%s')" % (
+            self.__class__.__name__,
+            "', '".join([n.__name__ for n in self]
+            )
+    
+    def __repr__(self):
+        return str(self)
     
     def merge(self, *args):
         """Return a new scope merging with additional namespaces
@@ -62,6 +76,11 @@ class Scope(frozenset):
 
 class DocumentScope(Scope):
     """An optional specification of the namespaces for an entire document.
+    
+    Instances of this class are used soley as arguments to the Document
+    generate() method and its kin, where lack of side-effects is a design goal.
+    Therefore, DocumentScope instances are designed to be immutable, though a
+    clever but unwise programmer may be able to circumvent this.
     """
     def merge(self, *args):
         """Return a new scope merging with additional namespaces.
