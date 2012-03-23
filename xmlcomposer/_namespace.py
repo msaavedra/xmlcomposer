@@ -59,7 +59,7 @@ class Scope(frozenset):
     def __str__(self):
         return "%s('%s')" % (
             self.__class__.__name__,
-            "', '".join([n.__name__ for n in self]
+            "', '".join([n.__name__ for n in self])
             )
     
     def __repr__(self):
