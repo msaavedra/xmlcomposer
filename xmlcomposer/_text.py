@@ -115,7 +115,7 @@ class TextBlock(object):
         if appropriate.
         
         Also, generate() is designed to be side-effect free, with the possible
-        exception of possible side-effects created by Callbacks outside the
+        exception of side-effects added through Callbacks outside the
         control of the TextBlock. This is so that TextBlocks can be created
         once, then used many times in different contexts, in many different
         threads, without being altered. Subclasses are STRONGLY ENCOURAGED to
@@ -130,10 +130,10 @@ class TextBlock(object):
         available in the context of the block's place within a document.
         
         The session arg may contain any data particular to the session
-        for which the text is being generated. It is passed to callbacks
+        for which the text is being generated. It is passed to Callbacks
         so they can create appropriate content. This argument is completely
         free-form, programmers can use any type of object they want, as
-        long as their Callbacks are capable of using it.
+        long as their Callback functions are capable of using it.
         """
         for line in self._contents:
             yield layout(line)
@@ -159,6 +159,17 @@ class SubstitutableTextBlock(TextBlock):
         replaces the flag. The callback must accept a single arg containing
         session information, and return a single instance of TextBlock or
         a subclass thereof.
+        
+        Example:
+        >>> def get_name(session):
+        ...     return PCData(session['name'])
+        >>> 
+        >>> c = CallBack(get_name, return_type=PCData)
+        >>> e = PCData('Hello %NAME%!').substitute('%NAME%', c)
+        >>> print e.render(session={'name': 'Alice'})
+        Hello Alice!
+        >>> print e.render(session={'name': 'Bob'})
+        Hello Bob!
         """
         def yield_substituted_lines(contents, layout, scope, session):
             """A generator-function closure for handling substitutions.
@@ -234,17 +245,7 @@ class CData(SubstitutableTextBlock):
 class CallBack(TextBlock):
     """A section whose contents are determined dynamically at generation-time.
     
-    Example:
-    
-    >>> def get_name(session):
-    ...     return PCData(session['name'])
-    >>> 
-    >>> c = CallBack(get_name, return_type=PCData)
-    >>> e = PCData('Hello %NAME%!').substitute('%NAME%', c)
-    >>> print e.render(session={'name': 'Alice'})
-    Hello Alice!
-    >>> print e.render(session={'name': 'Bob'})
-    Hello Bob!
+    See the SubstitutableTextBlock.substitute() method for an example.
     """
     def __init__(self, func, return_type=None):
         """Initialize the callback.

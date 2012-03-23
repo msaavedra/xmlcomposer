@@ -66,7 +66,7 @@ class Scope(frozenset):
         return str(self)
     
     def merge(self, *args):
-        """Return a new scope merging with additional namespaces
+        """Return a new scope with additional namespaces
         """ 
         return self.union(args)
     
@@ -83,7 +83,7 @@ class DocumentScope(Scope):
     clever but unwise programmer may be able to circumvent this.
     """
     def merge(self, *args):
-        """Return a new scope merging with additional namespaces.
+        """Return a new scope with additional namespaces.
         
         Note that this creates a regular Scope, not a DocumentScope.
         """
