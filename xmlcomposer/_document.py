@@ -72,9 +72,13 @@ class Template(SubstitutableTextBlock):
 
 class Comment(TextBlock):
     """An unparsed comment section in an XML document.
+    
+    Example:
+    >>> print Comment('This is an XML comment.')
+    <!--This is an XML comment.-->
     """
     def __init__(self, text):
-        text = '<!-- %s -->' % text
+        text = '<!--%s-->' % text
         super(Comment, self).__init__(text.split('\n'))
 
 
