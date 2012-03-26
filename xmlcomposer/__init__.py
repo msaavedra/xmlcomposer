@@ -8,6 +8,7 @@ __all__ = (
     '_element',
     '_layout',
     '_namespace',
+    '_processing_instruction',
     '_text',
     'Document',
     'Template',
@@ -35,16 +36,18 @@ __all__ = (
 # and ease of development. We import all relevant objects directly into the
 # base package namespace
 
-from _document import Document, Template, Comment, \
-    XMLDeclaration, XMLStylesheet, DocType, Prolog
+from _document import Document, Template, DocType, Prolog
 
-from _element import Element, ProcessingInstruction
+from _element import Element
 
 from _layout import Layout, DEFAULT_LAYOUT, SPARTAN_LAYOUT, MINIMAL_LAYOUT
 
 from _namespace import Namespace, Scope, DocumentScope
 
-from _text import PCData, CData, CallBack
+from _processing_instruction import ProcessingInstruction, \
+    XMLDeclaration, XMLStylesheet
+
+from _text import PCData, CData, CallBack, Comment
 
 
 def _reload():
@@ -54,19 +57,15 @@ def _reload():
     """
     import _document
     reload(_document)
-    global Document, Template, Comment, XMLDeclaration, XMLStylesheet, \
-        DocType, Prolog
+    global Document, Template, Comment, DocType, Prolog
     Document = _document.Document
     Template = _document.Template
     Comment = _document.Comment
-    XMLDeclaration = _document.XMLDeclaration
-    XMLStylesheet = _document.XMLStylesheet
     
     import _element
     reload(_element)
-    global Element, ProcessingInstruction
+    global Element
     Element = _element.Element
-    ProcessingInstruction = _element.ProcessingInstruction
     
     import _layout
     reload(_layout)
@@ -82,6 +81,13 @@ def _reload():
     Namespace = _namespace.Namespace
     Scope = _namespace.Scope
     DocumentScope = _namespace.DocumentScope
+    
+    import _processing_instruction
+    reload(_processing_instruction)
+    global ProcessingInstruction, XMLDeclaration, XMLStylesheet
+    ProcessingInstruction = _element.ProcessingInstruction
+    XMLDeclaration = _document.XMLDeclaration
+    XMLStylesheet = _document.XMLStylesheet
     
     import _text
     reload(_text)

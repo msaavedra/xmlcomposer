@@ -4,12 +4,9 @@
 """A set of classes for easily creating XML documents.
 """
 
-from types import FunctionType, MethodType
-
 from _text import TextBlock, SubstitutableTextBlock
 from _namespace import BASE_SCOPE, DocumentScope
 from _layout import DEFAULT_LAYOUT, SPARTAN_LAYOUT, MINIMAL_LAYOUT
-from _element import Element, ProcessingInstruction
 
 class Document(TextBlock):
     """A class used to generate an entire document.
@@ -68,39 +65,6 @@ class Template(SubstitutableTextBlock):
     def __iter__(self):
         with open(self.file_name, 'r') as f:
             return iter(f)
-
-
-class Comment(TextBlock):
-    """An unparsed comment section in an XML document.
-    
-    Example:
-    >>> print Comment('This is an XML comment.')
-    <!--This is an XML comment.-->
-    """
-    def __init__(self, text):
-        text = '<!--%s-->' % text
-        super(Comment, self).__init__(text.split('\n'))
-
-
-class XMLDeclaration(ProcessingInstruction):
-    """A line in the prolog to specify xml version, encoding, etc.
-    
-    Note: the XML declaration is technically not a processing instruction,
-    but the difference is not relevant for this use and the format is close
-    enough to treat it as one here.
-    """
-    default_attributes = {'version': '1.0', 'encoding': 'UTF-8'}
-    tag_name = 'xml'
-    
-    def __init__(self, **attributes):
-        super(XMLDeclaration, self).__init__(**attributes)
-
-
-class XMLStylesheet(ProcessingInstruction):
-    tag_name = 'xml-stylesheet'
-    
-    def __init__(self, **attributes):
-        super(XMLDeclaration, self).__init__(**attributes)
 
 
 class DocType(TextBlock):

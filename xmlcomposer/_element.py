@@ -115,20 +115,7 @@ class Element(TextBlock):
         for key, value in attributes.items():
             self[key] = value
         
-        # Assign a tag name if it isn't defined explicitly by the class.
-        # Try to do what's intuitive for anyone writing subclasses.
-        # If inheriting from the Element base class, use the
-        # new subclass's name. Otherwise, use the name of the parent class.
-        if self.tag_name is None:
-            for base in self.__class__.__bases__:
-                if not issubclass(base, Element):
-                    # The subclass is using multiple inheritance. Skip.
-                    continue
-                if base in (Element, ProcessingInstruction) :
-                    self.tag_name = self.__class__.__name__.lower()
-                else:
-                    self.tag_name = base.__name__.lower()
-                break
+        self.tag_name = self.determine_tag_name()
         
         self._contents = []
         self._content_types = set()
@@ -277,6 +264,28 @@ class Element(TextBlock):
         
         return('indeterminate')
     
+    def determine_tag_name(self):
+        """Get a tag name for the Element instance.
+        
+        This tries to do what's intuitive for anyone writing subclasses.
+        If it is defined explicitly by the class, use that name. If not,
+        and it's inheriting directly from the Element base class, use the
+        new subclass's __name__ converted all to lower case. If there are
+        custom subclasses between this class and Element, the best option
+        is to use the name of the parent class.
+        """
+        if self.__class__.tag_name:
+            return self.__class__.tag_name
+        else:
+            for base in self.__class__.__bases__:
+                if not issubclass(base, Element):
+                    # The subclass is using multiple inheritance. Skip.
+                    continue
+                if base is Element:
+                    return self.__class__.__name__.lower()
+                else:
+                    return base.__name__.lower()
+    
     def generate(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
         """Return a generator that produces XML line-by-line for the element.
         """
@@ -333,35 +342,4 @@ class Element(TextBlock):
             for line in element.generate(layout.indent(), inner_scope, session):
                 yield line
         yield layout(self.close_tag())
-
-
-class ProcessingInstruction(Element):
-    """A class for generating XML processing instructions.
-    
-    It is a subclass of Element (although a processing instruction is of
-    course not an Element, they are similar enough to use mostly the same
-    code).
-    
-    Example:
-    >>> class Word(ProcessingInstruction): pass
-    >>> print Word(document='test.doc')
-    <?word document="test.doc"?>
-    """
-    preformatted = True
-    
-    def open_tag(self, xmlns):
-        attribs = self.format_attributes()
-        if attribs:
-            attribs = ' %s' % attribs
-        
-        return '<?%s%s' % (self.tag_name, attribs)
-    
-    def close_tag(self):
-        """Return a string representing the closing version of the tag.
-        """
-        return '?>'
-    
-    def generate(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
-        return self._generate_preformatted(layout, scope, session)
-
 

@@ -271,3 +271,15 @@ class CallBack(TextBlock):
     def generate(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
         return self.func(session).generate(layout, scope, session)
 
+
+class Comment(TextBlock):
+    """An unparsed, non-character-data, explanatory note in an XML document.
+    
+    Example:
+    >>> print Comment('This is an XML comment.')
+    <!--This is an XML comment.-->
+    """
+    def __init__(self, text):
+        text = '<!--%s-->' % text
+        super(Comment, self).__init__(text.split('\n'))
+
