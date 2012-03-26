@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 
+import os
 import sys
 import unittest
 from doctest import DocTestSuite, NORMALIZE_WHITESPACE
@@ -15,12 +16,10 @@ for obj in vars(xmlcomposer).values():
     if isinstance(obj, ModuleType):
         suite.addTest(DocTestSuite(obj, optionflags=NORMALIZE_WHITESPACE))
 
-# Add the test subpackages. These can also be run individually.
-test_names = (
-    'test_element',
-    'test_text',
-    )
-suite.addTest(unittest.defaultTestLoader.loadTestsFromNames(test_names))
+# Add the test subpackages.
+files = os.listdir(os.path.split(__file__)[0])
+tests = [n[:-3] for n in files if n.startswith('test_') and n.endswith('.py')]
+suite.addTest(unittest.defaultTestLoader.loadTestsFromNames(tests))
 
 # Run everything.
 unittest.TextTestRunner(verbosity=2).run(suite)
