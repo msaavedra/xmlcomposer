@@ -28,7 +28,7 @@ from operator import itemgetter
 class Layout(tuple):
     """Settings and routines for managing the layout of generated XML.
     
-    Instances of this class are used soley as arguments to the TextBlock
+    Instances of this class are used solely as arguments to the TextBlock
     generate() method and its kin, where lack of side-effects is a design goal.
     Therefore, Layout instances are designed to be immutable, though a clever
     but unwise programmer may be able to circumvent this.
