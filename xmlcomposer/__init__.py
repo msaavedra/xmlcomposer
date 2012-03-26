@@ -85,9 +85,9 @@ def _reload():
     import _processing_instruction
     reload(_processing_instruction)
     global ProcessingInstruction, XMLDeclaration, XMLStylesheet
-    ProcessingInstruction = _element.ProcessingInstruction
-    XMLDeclaration = _document.XMLDeclaration
-    XMLStylesheet = _document.XMLStylesheet
+    ProcessingInstruction = _processing_instruction.ProcessingInstruction
+    XMLDeclaration = _processing_instruction.XMLDeclaration
+    XMLStylesheet = _processing_instruction.XMLStylesheet
     
     import _text
     reload(_text)
