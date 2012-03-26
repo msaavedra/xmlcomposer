@@ -195,7 +195,7 @@ class Element(TextBlock):
         """
         return self._attributes.items()
     
-    def format_attributes(self, scope):
+    def format_attributes(self):
         """An internal method to build attributes in proper XML format.
         """
         return ' '.join('%s="%s"' % i for i in sorted(self.items()))
@@ -233,19 +233,19 @@ class Element(TextBlock):
             return ''
     
     def format_xmlns(self, namespace):
-        """An internal method to get a specially-handled xmlns attribute.
+        """An internal method to get the specially-handled xmlns attribute.
         """
         if not namespace.__name__:
             return ''
-        attr_name = 'xmlns'
-        if namespace.__prefix__:
-            attr_name = '%s:%s' % (attr_name, namespace.__prefix__)
-        return ' %s="%s"' % (attr_name, namespace.__name__)
+        elif namespace.__prefix__:
+            return ' xmlns:%s="%s"' % (namespace.__prefix__, namespace.__name__)
+        else:
+            return ' xmlns="%s"' % namespace.__name__
     
-    def open_tag(self, xmlns, scope):
+    def open_tag(self, xmlns):
         """An internal method to get the opening version of the tag.
         """
-        attribs = self.format_attributes(scope)
+        attribs = self.format_attributes()
         if attribs:
             attribs = ' %s' % attribs
         
@@ -253,7 +253,7 @@ class Element(TextBlock):
             self.format_prefix(), self.tag_name, xmlns, attribs
             )
     
-    def close_tag(self, scope):
+    def close_tag(self):
         """An internal method to get the closing version of the tag.
         """
         return '</%s%s>' % (self.format_prefix(), self.tag_name)
@@ -261,16 +261,21 @@ class Element(TextBlock):
     def determine_content_type(self, item):
         """An internal method to get a description of an arbitrary item.
         """
-        if item.preformatted:
+        if hasattr(item, 'preformatted') and item.preformatted:
             return 'preformatted'
         elif isinstance(item, Element):
             return 'element'
         elif isinstance(item, PCData):
             return 'pcdata'
         elif isinstance(item, CallBack):
-            return self.determine_content_type(item.return_type)
-        else:
-            return('indeterminate')
+            if item.return_type.preformatted:
+                return 'preformatted'
+            elif issubclass(item.return_type, Element):
+                return 'element'
+            elif issubclass(item.return_type, PCData):
+                return 'pcdata'
+        
+        return('indeterminate')
     
     def generate(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
         """Return a generator that produces XML line-by-line for the element.
@@ -296,18 +301,17 @@ class Element(TextBlock):
     
     def _generate_preformatted(self, layout, scope, session):
         xmlns, inner_scope = self.determine_scope(scope)
-        yield layout(self.open_tag(xmlns, scope)).rstrip()
+        yield layout(self.open_tag(xmlns)).rstrip()
         for element in self._contents:
             if isinstance(element, CallBack):
                 element = element.func(session)
             for line in element.generate(SPARTAN_LAYOUT, inner_scope, session):
                 yield line
-        yield layout(self.close_tag(scope)).lstrip()
+        yield layout(self.close_tag()).lstrip()
     
     def _generate_flat(self, layout, scope, session):
         xmlns, inner_scope = self.determine_scope(scope)
         parts = []
-        last = None
         for element in self._contents:
             if isinstance(element, CallBack):
                 element = element.func(session)
@@ -315,37 +319,49 @@ class Element(TextBlock):
                 element.generate(MINIMAL_LAYOUT, inner_scope, session)
                 )
             parts.append(part)
-            last = element
         line = '%s%s%s' % (
-            self.open_tag(xmlns, scope), ''.join(parts), self.close_tag(scope)
+            self.open_tag(xmlns), ''.join(parts), self.close_tag()
             )
         yield layout(line, wrap=True)
     
     def _generate_nested(self, layout, scope, session):
         xmlns, inner_scope = self.determine_scope(scope)
-        yield layout(self.open_tag(xmlns, scope))
+        yield layout(self.open_tag(xmlns))
         for element in self._contents:
             if isinstance(element, CallBack):
                 element = element.func(session)
             for line in element.generate(layout.indent(), inner_scope, session):
                 yield line
-        yield layout(self.close_tag(scope))
+        yield layout(self.close_tag())
 
 
 class ProcessingInstruction(Element):
-    """
+    """A class for generating XML processing instructions.
+    
+    It is a subclass of Element (although a processing instruction is of
+    course not an Element, they are similar enough to use mostly the same
+    code).
+    
+    Example:
+    >>> class Word(ProcessingInstruction): pass
+    >>> print Word(document='test.doc')
+    <?word document="test.doc"?>
     """
     preformatted = True
     
-    def open_tag(self, xmlns, scope):
-        attribs = self.format_attributes(scope)
+    def open_tag(self, xmlns):
+        attribs = self.format_attributes()
         if attribs:
             attribs = ' %s' % attribs
         
         return '<?%s%s' % (self.tag_name, attribs)
     
-    def close_tag(self, scope):
+    def close_tag(self):
         """Return a string representing the closing version of the tag.
         """
         return '?>'
+    
+    def generate(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
+        return self._generate_preformatted(layout, scope, session)
+
 
