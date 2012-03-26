@@ -1,6 +1,10 @@
 
 import unittest
 
-from xmlcomposer._text import *
+import xmlcomposer
 
+
+
+if __name__ == '__main__':
+    unittest.main()
 

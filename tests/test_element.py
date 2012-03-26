@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 """Unit tests for the Element class.
 
 Much of this class is tested using doctest instead of traditional unit testing.
@@ -64,4 +65,6 @@ class TestElementInternalMethods(unittest.TestCase):
         
         assert e.determine_content_type('') == 'indeterminate'
     
+if __name__ == '__main__':
+    unittest.main()
 
