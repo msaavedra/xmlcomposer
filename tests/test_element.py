@@ -65,6 +65,28 @@ class TestElementInternalMethods(unittest.TestCase):
         
         assert e.determine_content_type('') == 'indeterminate'
     
+    def test_generate_preformatted(self):
+        class Pre(xmlcomposer.Element):
+            preformatted = True
+        pre = Pre('When preformatted,\nhonor newlines')
+        expected = '<pre>When preformatted,\nhonor newlines</pre>\n'
+        assert pre.render() == expected
+    
+    def test_generate_flat(self):
+        class P(xmlcomposer.Element): pass
+        p = P(
+            'This is a sentence.',
+            ' This is another.'
+            )
+        expected = '<p>This is a sentence. This is another.</p>\n'
+        assert p.render() == expected
+    
+    def test_generate_nested(self):
+        class Nest(xmlcomposer.Element): pass
+        n = Nest(Nest('Line1'))
+        expected = '<nest>\n\t<nest>Line1</nest>\n</nest>\n'
+        assert n.render() == expected
+    
 if __name__ == '__main__':
     unittest.main()
 

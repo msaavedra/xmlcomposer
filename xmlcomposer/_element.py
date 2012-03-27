@@ -286,6 +286,13 @@ class Element(TextBlock):
                 else:
                     return base.__name__.lower()
     
+    def render(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
+        """Return the generated element as a string.
+        
+        The arguments are identical to the generate() method.
+        """
+        return super(Element, self).render(layout, scope, session)
+    
     def generate(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
         """Return a generator that produces XML line-by-line for the element.
         """
@@ -310,13 +317,13 @@ class Element(TextBlock):
     
     def _generate_preformatted(self, layout, scope, session):
         xmlns, inner_scope = self.determine_scope(scope)
-        yield layout(self.open_tag(xmlns)).rstrip()
+        yield self.open_tag(xmlns)
         for element in self._contents:
             if isinstance(element, CallBack):
                 element = element.func(session)
-            for line in element.generate(SPARTAN_LAYOUT, inner_scope, session):
+            for line in element.generate(MINIMAL_LAYOUT, inner_scope, session):
                 yield line
-        yield layout(self.close_tag()).lstrip()
+        yield layout(self.close_tag())
     
     def _generate_flat(self, layout, scope, session):
         xmlns, inner_scope = self.determine_scope(scope)
