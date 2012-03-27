@@ -201,18 +201,27 @@ class SubstitutableTextBlock(TextBlock):
 class PCData(SubstitutableTextBlock):
     """A section of parsed character data.
     
-    Like SubstitutableTextBlock, but the arg is a single string. This
-    class is seldom needed in practice, because the element classes are
-    able to accept XML PCDATA sections as plain strings.
+    Like SubstitutableTextBlock, but the arg may be a single string rather
+    than a sequence of strings. This class is seldom needed in practice,
+    because the element classes are able to accept XML PCDATA sections as
+    plain strings.
     """
-    def __init__(self, text, escape=True):
-        if isinstance(text, tuple) or isinstance(text, list):
-            text = '\n'.join(text)
-        if '\t' in text or '\n' in text or '   ' in text:
-            self.preformatted = True
-        if escape:
-            text = self.escape(text)
-        super(PCData, self).__init__(text.split('\n'))
+    def __init__(self, lines, escape=True):
+        if isinstance(lines, str):
+            if '\t' in lines or '\n' in lines or '   ' in lines:
+                self.preformatted = True
+            if escape:
+                lines = self.escape(lines)
+            lines = [lines]
+        else:
+            if escape:
+                lines = [self.escape(line) for line in lines]
+            for line in lines:
+                if '\t' in line or '\n' in line or '   ' in line:
+                    self.preformatted = True
+                    break
+        
+        super(PCData, self).__init__(lines)
 
 
 class CData(SubstitutableTextBlock):
