@@ -46,7 +46,7 @@ class Layout(tuple):
     def __new__(cls, indent_style='\t', indent_count=0,
              line_ending='\n', line_wrap=80):
         indentation = indent_style * indent_count
-        default_wrap = max(48, line_wrap - len(indentation))
+        default_wrap = max(40, line_wrap - len(indentation))
         min_wrap = default_wrap / 2
         return tuple.__new__(cls, (
             indent_style,
@@ -83,7 +83,7 @@ class Layout(tuple):
         if line.strip == '':
             return line_ending
         elif wrap == False or self.line_wrap == 0 or self.line_ending == '':
-            return self.indentation + line + self.line_ending
+            return '%s%s%s' % (self.indentation, line, self.line_ending)
         else:
             parts = []
             while len(line) > self.default_wrap:
