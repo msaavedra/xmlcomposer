@@ -11,35 +11,26 @@ from _layout import DEFAULT_LAYOUT, SPARTAN_LAYOUT, MINIMAL_LAYOUT
 class Document(TextBlock):
     """A class used to generate an entire document.
     
-    It contains the root element, and optionally a prolog.
-    """
-    def __init__(self, root, prolog=None):
-        root.is_root = True
-        self.root = root
-        if prolog:
-            self.prolog = prolog
-        else:
-            self.prolog = Prolog()
-    
-    def __str__(self):
-        return ''.join(self.generate(DEFAULT_LAYOUT))
-    
-    def generate(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
-        if not isinstance(scope, DocumentScope):
-            scope = scope.make_document_scope()
-        for line in self.prolog.generate(layout, scope, session):
-            yield line
-        for line in self.root.generate(layout, scope, session):
-            yield line
-
-
-class Prolog(TextBlock):
-    """A TextBlock-compatible holder for all XML lines before the root element.
+    To make a well-formed document, it must contain exactly one Element
+    instance. Optionally, it can also contain DocType and ProcessingInstruction
+    and Comment instances that are not enclosed within the Element.
     """
     def __init__(self, *contents):
         self.contents = contents
     
-    def generate(self, layout=SPARTAN_LAYOUT, scope=BASE_SCOPE, session=None):
+    def __str__(self):
+        return ''.join(self.generate(DEFAULT_LAYOUT))
+    
+    def render(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
+        """Return the generated element as a string.
+        
+        The arguments are identical to the generate() method.
+        """
+        return super(Document, self).render(layout, scope, session)
+    
+    def generate(self, layout=DEFAULT_LAYOUT, scope=BASE_SCOPE, session=None):
+        if not isinstance(scope, DocumentScope):
+            scope = scope.make_document_scope()
         for item in self.contents:
             for line in item.generate(layout, scope, session):
                 yield line

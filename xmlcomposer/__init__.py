@@ -16,7 +16,6 @@ __all__ = (
     'XMLDeclaration',
     'XMLStylesheet',
     'DocType',
-    'Prolog',
     'Element',
     'ProcessingInstruction',
     'Layout',
@@ -36,7 +35,7 @@ __all__ = (
 # and ease of development. We import all relevant objects directly into the
 # base package namespace
 
-from _document import Document, Template, DocType, Prolog
+from _document import Document, Template, DocType
 
 from _element import Element
 
@@ -57,10 +56,9 @@ def _reload():
     """
     import _document
     reload(_document)
-    global Document, Template, Comment, DocType, Prolog
+    global Document, Template, Comment, DocType
     Document = _document.Document
     Template = _document.Template
-    Comment = _document.Comment
     
     import _element
     reload(_element)
@@ -91,8 +89,9 @@ def _reload():
     
     import _text
     reload(_text)
-    global PCData, CData, CallBack
+    global PCData, CData, CallBack, Comment
     PCData = _text.PCData
     CData = _text.PCData
     CallBack = _text.CallBack
+    Comment = _text.Comment
 
