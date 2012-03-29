@@ -10,12 +10,15 @@ from _layout import DEFAULT_LAYOUT, SPARTAN_LAYOUT, MINIMAL_LAYOUT
 
 class Document(TextBlock):
     """A class used to generate an entire document.
-    
-    To make a well-formed document, it must contain exactly one Element
-    instance. Optionally, it can also contain DocType and ProcessingInstruction
-    and Comment instances that are not enclosed within the Element.
     """
     def __init__(self, *contents):
+        """Pass contents to a new Document instance.
+        
+        To make a well-formed document, it must contain exactly one Element
+        instance. Optionally, it can also contain DocType,
+        ProcessingInstruction and Comment instances that are not enclosed
+        within the root element.
+        """
         self.contents = contents
     
     def __str__(self):
@@ -59,7 +62,7 @@ class Template(SubstitutableTextBlock):
 
 
 class DocType(TextBlock):
-    """A line in the prolog to provide schema information to parsers.
+    """An XML structure to provide schema information to parsers.
     
     The XML spec allows the use of internal DOCTYPE code, but this
     implementation only supports external references.
