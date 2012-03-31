@@ -1,5 +1,45 @@
 # Copyright (c) 1999, 2012 Michael Saavedra
 # This file may be redistributed under the terms of the GNU LPGL v. 3 or later.
+"""xmlcomposer is a python package for easily generating XML and HTML.
+
+It has three design goals: first, to provide a useful and uncomplicated API
+that aids separation of logic from content; second, to cover as many of the
+features of XML as possible while still retaining simplicity; third, to
+perform well enough to be used on high traffic web backends.
+
+Here is an HTML5 example that covers the most common usage:
+
+>>> import xmlcomposer
+>>> from xmlcomposer.formats.html5 import *
+>>>
+>>> root = Html(lang='en')(
+...     Head(
+...         Title('Example HTML5 Document'),
+...         Meta(charset='utf-8'),
+...         Script(src='javascript/example.js'),
+...         Link(rel='stylesheet', href='css/example.css'),
+...     ),
+...     Body(
+...         H1('HTML5 & xmlcomposer: An example'),
+...         Canvas(id='ExampleCanvas'),
+...     ),
+... )
+>>> print xmlcomposer.Document(xmlcomposer.DocType('html'), root)
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Example HTML5 Document</title>
+        <meta charset="utf-8"/>
+        <script src="javascript/example.js"></script>
+        <link href="css/example.css" rel="stylesheet"/>
+    </head>
+    <body>
+        <h1>HTML5 &amp; xmlcomposer: An example</h1>
+        <canvas id="ExampleCanvas"></canvas>
+    </body>
+</html>
+
+"""
 
 __all__ = (
     'schema',

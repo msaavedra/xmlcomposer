@@ -26,6 +26,7 @@ class Element(TextBlock):
     # These can, but need not, be replaced in subclasses.
     tag_name = None
     namespace = None
+    self_closing = True
     default_attributes = {}
     
     def __init__(self, *contents, **attributes):
@@ -297,7 +298,10 @@ class Element(TextBlock):
         """Return a generator that produces XML line-by-line for the element.
         """
         if not self._content_types:
-            return self._generate_empty(layout, scope, session)
+            if self.self_closing:
+                return self._generate_empty(layout, scope, session)
+            else:
+                return self._generate_flat(layout, scope, session)
         elif self.preformatted or 'preformatted' in self._content_types:
             return self._generate_preformatted(layout, scope, session)
         elif 'pcdata' in self._content_types \
