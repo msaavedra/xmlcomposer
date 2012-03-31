@@ -312,7 +312,7 @@ class Element(TextBlock):
             self.format_prefix(),
             self.tag_name,
             xmlns,
-            self.format_attributes(scope)
+            self.format_attributes()
             ))
     
     def _generate_preformatted(self, layout, scope, session):
