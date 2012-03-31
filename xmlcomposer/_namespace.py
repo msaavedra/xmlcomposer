@@ -6,7 +6,7 @@ from types import ModuleType
 class Namespace(ModuleType):
     """A module-like object representing an XML namespace.
     """
-    def __init__(self, name='', prefix='', module=None):
+    def __init__(self, name='', prefix='', module=None, elements=()):
         super(Namespace, self).__init__(name)
         super(Namespace, self).__setattr__('__prefix__', prefix)
         del self.__doc__
@@ -21,6 +21,9 @@ class Namespace(ModuleType):
                 super(Namespace, self).__setattr__(
                     '__name__', module.__namespace__
                     )
+        
+        for element in elements:
+            setattr(self, element.__name__, element)
     
     def __repr__(self):
         ret_val = '<Namespace'
