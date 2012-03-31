@@ -14,10 +14,12 @@ class Document(TextBlock):
     def __init__(self, *contents):
         """Pass contents to a new Document instance.
         
-        To make a well-formed document, it must contain exactly one Element
-        instance. Optionally, it can also contain DocType,
-        ProcessingInstruction and Comment instances that are not enclosed
-        within the root element.
+        To make a well-formed XML document, it must contain exactly one Element
+        instance, though some forms of HTML don't need to have one root element
+        that contains all other elements.
+        
+        Optionally, it can also contain DocType, ProcessingInstruction and
+        Comment instances that are not enclosed within the root element.
         """
         self.contents = contents
     
