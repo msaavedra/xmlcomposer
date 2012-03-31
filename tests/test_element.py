@@ -87,6 +87,12 @@ class TestElementInternalMethods(unittest.TestCase):
         expected = '<nest>\n\t<nest>Line1</nest>\n</nest>\n'
         assert n.render() == expected
     
+    def test_generate_empty(self):
+        class Empty(xmlcomposer.Element): pass
+        e = Empty(class_='test')
+        expected = '<empty class="test"/>\n'
+        assert e.render() == expected
+    
 if __name__ == '__main__':
     unittest.main()
 
