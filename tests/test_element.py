@@ -15,7 +15,7 @@ class TestElementInternalMethods(unittest.TestCase):
     """
     def test_format_attributes(self):
         e = xmlcomposer.Element(id_='format_attributes', class_='element_test')
-        expected = 'class="element_test" id="format_attributes"'
+        expected = ' class="element_test" id="format_attributes"'
         assert e.format_attributes() == expected
     
     def test_format_prefix(self):

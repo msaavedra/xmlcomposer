@@ -4,6 +4,7 @@
 """An ancestor class for XML elements.
 """
 
+from operator import attrgetter
 from xml.sax.saxutils import escape, unescape
 
 from _text import TextBlock, PCData, CallBack
@@ -186,7 +187,10 @@ class Element(TextBlock):
     def format_attributes(self):
         """An internal method to build attributes in proper XML format.
         """
-        return ' '.join('%s="%s"' % i for i in sorted(self.items()))
+        attribs = ' '.join('%s="%s"' % i for i in sorted(self.items()))
+        if attribs:
+            attribs = ' %s' % attribs
+        return attribs
     
     def determine_scope(self, scope):
         """An internal method to figure out the namespace scoping context.
@@ -203,7 +207,8 @@ class Element(TextBlock):
                 scope = scope.merge(self.namespace)
             else:
                 scope = scope.make_regular_scope()
-            xmlns = ''.join([self.format_xmlns(ns) for ns in scope])
+            sorted_scope = sorted(scope, key=attrgetter('__prefix__'))
+            xmlns = ''.join([self.format_xmlns(ns) for ns in sorted_scope])
             return xmlns, scope
         elif self.namespace is None or self.namespace in scope:
             return '', scope
@@ -233,12 +238,8 @@ class Element(TextBlock):
     def open_tag(self, xmlns):
         """An internal method to get the opening version of the tag.
         """
-        attribs = self.format_attributes()
-        if attribs:
-            attribs = ' %s' % attribs
-        
         return '<%s%s%s%s>' % (
-            self.format_prefix(), self.tag_name, xmlns, attribs
+            self.format_prefix(), self.tag_name, xmlns, self.format_attributes()
             )
     
     def close_tag(self):
@@ -312,7 +313,7 @@ class Element(TextBlock):
     
     def _generate_empty(self, layout, scope, session):
         xmlns = self.determine_scope(scope)[0]
-        yield layout('<%s%s%s %s/>' % (
+        yield layout('<%s%s%s%s/>' % (
             self.format_prefix(),
             self.tag_name,
             xmlns,
