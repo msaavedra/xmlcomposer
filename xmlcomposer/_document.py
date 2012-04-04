@@ -47,16 +47,30 @@ class Template(SubstitutableTextBlock):
     The contents from the file are not parsed to test for validity or
     well-formedness. You can make substitutions like in the
     SubstitutableTextBlock on which it is based.
+    
+    Example:
+    
+    >>> # first we need to create a test template file.
+    >>> import os, tempfile
+    >>> fd, file_name = tempfile.mkstemp()
+    >>> f = os.fdopen(fd, 'w')
+    >>> f.write('<p>This is a template test!</p>')
+    >>> f.close()
+    >>> 
+    >>> t = Template(file_name)
+    >>> os.remove(file_name)
+    >>> print t
+    <p>This is a template test!</p>
     """
     def __init__(self, file_name, iterator=False):
         self.file_name = file_name
         if iterator:
             contents = self
         else:
-            f = (file_name, 'r')
+            f = open(file_name, 'r')
             contents = f.readlines()
             f.close()
-        super(Template, self).__init__(self, contents)
+        super(Template, self).__init__(contents)
     
     def __iter__(self):
         with open(self.file_name, 'r') as f:
