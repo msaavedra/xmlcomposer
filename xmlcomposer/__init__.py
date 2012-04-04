@@ -7,24 +7,27 @@ that aids separation of logic from content; second, to cover as many of the
 features of XML as possible while still retaining simplicity; third, to
 perform well enough to be used on high traffic web backends.
 
-Here is an HTML5 example that covers the most common usage:
+Here is an HTML5 example that covers very basic usage:
 
 >>> import xmlcomposer
 >>> from xmlcomposer.formats.html5 import *
 >>>
->>> root = Html(lang='en')(
-...     Head(
-...         Title('Example HTML5 Document'),
-...         Meta(charset='utf-8'),
-...         Script(src='javascript/example.js'),
-...         Link(rel='stylesheet', href='css/example.css'),
-...     ),
-...     Body(
-...         H1('HTML5 & xmlcomposer: An example'),
-...         Canvas(id='ExampleCanvas'),
-...     ),
+>>> doc = xmlcomposer.Document(
+...     xmlcomposer.DocType('html'),
+...     Html(lang='en')(
+...         Head(
+...             Title('Example HTML5 Document'),
+...             Meta(charset='utf-8'),
+...             Script(src='javascript/example.js'),
+...             Link(rel='stylesheet', href='css/example.css'),
+...         ),
+...         Body(
+...             H1('HTML5 & xmlcomposer: An example'),
+...             Canvas(id='ExampleCanvas'),
+...         ),
+...     )
 ... )
->>> print xmlcomposer.Document(xmlcomposer.DocType('html'), root)
+>>> print doc
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -39,6 +42,62 @@ Here is an HTML5 example that covers the most common usage:
     </body>
 </html>
 
+Here is a more complicated example involving custom-made elements, an XML
+declaration, namespaces specified in several different ways, comments, etc.
+It was taken more-or-less verbatim from the XHTML1 documentation at
+http://www.w3.org/TR/xhtml1/:
+
+>>> from xmlcomposer import schema
+>>> 
+>>> # A namespace imported from a DTD on the web.
+>>> books = schema.load('http://will-o-wisp.org/books.dtd', 'urn:loc.gov:books')
+>>> 
+>>> # A custom element with its own namespace for pedagogical purposes.
+>>> class Number(xmlcomposer.Element): pass
+>>> isbn = xmlcomposer.Namespace(
+...     name='urn:ISBN:0-395-36341-6',
+...     prefix='isbn',
+...     elements=(Number,)
+... )
+>>> 
+>>> # A namespace loaded from a prebuilt module.
+>>> x = xmlcomposer.Namespace(
+...     name='http://www.w3.org/1999/xhtml',
+...     module='xmlcomposer.formats.xhtml_1_strict'
+... )
+>>> 
+>>> doc = xmlcomposer.Document(
+...     xmlcomposer.XMLDeclaration(version='1.0', encoding='UTF-8'),
+...     xmlcomposer.Comment('Initially, the default namespace is "books"'),
+...     books.Book(
+...         books.Title('Cheaper by the Dozen'),
+...         isbn.Number('1568491379'),
+...         books.Notes(
+...             xmlcomposer.Comment('XHTML becomes default namespace'),
+...             x.P(
+...                 'This is also available ',
+...                 x.A(href='http://www.w3.org/')('online'),
+...                 '.'
+...             )
+...         )
+...     )
+... )
+>>> print doc.render(scope=xmlcomposer.DocumentScope(books, isbn))
+<?xml encoding="UTF-8" version="1.0"?>
+<!--Initially, the default namespace is "books"-->
+<book xmlns="urn:loc.gov:books" xmlns:isbn="urn:ISBN:0-395-36341-6">
+    <title>Cheaper by the Dozen</title>
+    <isbn:number>1568491379</isbn:number>
+    <notes>
+        <!--XHTML becomes default namespace-->
+        <p xmlns="http://www.w3.org/1999/xhtml">This is also available
+        <a href="http://www.w3.org/">online</a>.</p>
+    </notes>
+</book>
+
+See the documentation for the individual classes for more information
+and examples. Also, check in the utilities directory for more complex
+usage of xmlcomposer.
 """
 
 __all__ = (
