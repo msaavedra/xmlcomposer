@@ -1,10 +1,9 @@
 #!/usr/bin/env python2
 
 import os
-import sys
 import unittest
 from doctest import DocTestSuite, NORMALIZE_WHITESPACE
-from types import ModuleType, TypeType
+from types import ModuleType
 
 import xmlcomposer
 
