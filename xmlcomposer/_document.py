@@ -20,6 +20,18 @@ class Document(TextBlock):
         
         Optionally, it can also contain DocType, ProcessingInstruction and
         Comment instances that are not enclosed within the root element.
+        
+        Example:
+        
+        >>> import xmlcomposer
+        >>> from xmlcomposer.formats.html5 import Html
+        >>>
+        >>> print Document(
+        ...     xmlcomposer.DocType('html'),
+        ...     Html('Hello World')
+        ... )
+        <!DOCTYPE html>
+        <html>Hello World</html>
         """
         self.contents = contents
     
@@ -82,6 +94,10 @@ class DocType(TextBlock):
     
     The XML spec allows the use of internal DOCTYPE code, but this
     implementation only supports external references.
+    
+    Example:
+    >>> print DocType('example', 'example.dtd')
+    <!DOCTYPE example SYSTEM "example.dtd">
     """
     def __init__(self, root_name, system_id='', public_id=''):
         if system_id and public_id:
