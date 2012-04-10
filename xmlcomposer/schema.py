@@ -24,10 +24,33 @@ else:
 CACHE = os.path.normpath(CACHE)
 
 def load(schema_location, namespace_id='', namespace_prefix=''):
+    """Create elements from schema information at a location.
+    
+    The schema_location can be either a file path or any URL supported by
+    python's standard urllib2.urlopen(). A number of different schema types are
+    supported: DTD, XSD and RELAX-NG.
+    
+    The namespace_id and namespace_prefix are passed to the created namespace
+    upon initialization. See the namespace documentation for more information.
+    
+    The return value is a namespace loaded with element classes which
+    are auto-generated from the schema.
+    """
     schema = SchemaDocument(schema_location)
     return schema.parse(namespace_id, namespace_prefix)
 
 def export(schema_location, namespace_id='', export_path=None):
+    """Load elements from a schema then write them to a python module.
+    
+    This uses the load() function defined elsewhere in this module, so the same
+    location and format restrictions apply here as well.
+    
+    The namespace_id is written to the new module as it's __namespace__
+    attribute and will be used if the module is loaded by a Namespace instance.
+    
+    If export_path is not specified, the python code will be written to the
+    standard output.
+    """
     namespace = load(schema_location, namespace_id)
     if export_path:
         f = open(export_path, 'w')
@@ -102,6 +125,7 @@ class SchemaDocument(object):
             f.write(text)
             f.close()
         return text
+
 
 class DtdParser(object):
     
