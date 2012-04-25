@@ -81,7 +81,7 @@ class Element(TextBlock):
         descendent classes will keep the child tag_name. If this is not what
         you want, you can always set tag_name explicitly.
         
-        You can also explicitly name default attritbutes of an Element subclass
+        You can also explicitly name default attributes of an Element subclass
         by specifying a default_attributes dictionary in the subclass.
         
         Here is a continuation of the previous example using new features:
