@@ -267,7 +267,6 @@ class CallBack(TextBlock):
         which will be returned by the callback (ie an Element, PCData, etc.).
         This allows a parent element to do a better job of laying out its
         content.
-        
         """
         self.func = func
         if isinstance(return_type, CallBack):
