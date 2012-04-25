@@ -7,8 +7,6 @@ that aids separation of logic from content; second, to cover as many of the
 features of XML as possible while still retaining simplicity; third, to
 perform well enough to be used on high traffic web backends.
 
-
-
 Here is an example that uses much of the API, including custom-made elements,
 an XML declaration, namespaces specified in several different ways, comments,
 etc. It was taken more-or-less verbatim from the XHTML1 documentation at
