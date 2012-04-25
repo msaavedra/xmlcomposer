@@ -12,7 +12,7 @@ class Document(TextBlock):
     """A class used to generate an entire document.
     """
     def __init__(self, *contents):
-        """Pass contents to a new Document instance.
+        """Initialize a Document instance, passing contents to it.
         
         To make a well-formed XML document, it must contain exactly one Element
         instance, though some forms of HTML don't need to have one root element
