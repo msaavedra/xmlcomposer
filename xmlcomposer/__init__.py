@@ -67,8 +67,9 @@ usage of xmlcomposer.
 """
 
 __all__ = (
-    'schema',
+    'export',
     'formats',
+    'schema',
     '_document',
     '_element',
     '_layout',
@@ -112,51 +113,4 @@ from _processing_instruction import ProcessingInstruction, \
     XMLDeclaration, XMLStylesheet
 
 from _text import PCData, CData, CallBack, Comment
-
-
-def _reload():
-    """A routine to facilitate reloading all the objects in this package.
-    
-    This is an ugly hack, and intended to be used only by package developers.
-    """
-    import _document
-    reload(_document)
-    global Document, Template, Comment, DocType
-    Document = _document.Document
-    Template = _document.Template
-    
-    import _element
-    reload(_element)
-    global Element
-    Element = _element.Element
-    
-    import _layout
-    reload(_layout)
-    global Layout, DEFAULT_LAYOUT, SPARTAN_LAYOUT, MINIMAL_LAYOUT
-    Layout = _layout.Layout
-    DEFAULT_LAYOUT = _layout.DEFAULT_LAYOUT
-    SPARTAN_LAYOUT = _layout.SPARTAN_LAYOUT
-    MINIMAL_LAYOUT = _layout.MINIMAL_LAYOUT
-    
-    import _namespace
-    reload(_namespace)
-    global Namespace, Scope, DocumentScope
-    Namespace = _namespace.Namespace
-    Scope = _namespace.Scope
-    DocumentScope = _namespace.DocumentScope
-    
-    import _processing_instruction
-    reload(_processing_instruction)
-    global ProcessingInstruction, XMLDeclaration, XMLStylesheet
-    ProcessingInstruction = _processing_instruction.ProcessingInstruction
-    XMLDeclaration = _processing_instruction.XMLDeclaration
-    XMLStylesheet = _processing_instruction.XMLStylesheet
-    
-    import _text
-    reload(_text)
-    global PCData, CData, CallBack, Comment
-    PCData = _text.PCData
-    CData = _text.PCData
-    CallBack = _text.CallBack
-    Comment = _text.Comment
 
