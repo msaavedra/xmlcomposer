@@ -3,5 +3,5 @@
 * Write unit tests for internal-only code.
 * Create utility script that generates documentation html from docstrings.
 * Work out Django compatibility
-* Cache expiration for schema loader.
+* Cache expiration for schema loader (maybe explicit deletion instead?).
 
