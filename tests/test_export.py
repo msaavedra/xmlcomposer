@@ -24,13 +24,10 @@ class TestExport(unittest.TestCase):
             export.to_file(lines, file_name, backup_name)
             
             with open(file_name, 'r') as f:
-                file_contents = f.read()
-            
+                assert new_contents == f.read()
             with open(backup_name, 'r') as f:
-                backup_contents = f.read()
-            
-            assert file_contents == new_contents
-            assert backup_contents == original_contents
+                assert original_contents == f.read()
+        
         finally:
             if os.path.exists(file_name):
                 os.remove(file_name)

@@ -13,7 +13,7 @@ if os.name == 'nt':
         # ReplaceFile() apparently requires the backup file to already
         # exist, which is not very useful. Make the backup explicitly.
         if backup_path and os.path.exists(new_path):
-            shutil.copy(old_path, backup_path)
+            shutil.copy(new_path, backup_path)
         wf.ReplaceFile(old_path, new_path, None, OPTIONS)
 else:
     def _replace(old_path, new_path, backup_path=None):
