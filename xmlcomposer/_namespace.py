@@ -84,7 +84,6 @@ class Namespace(ModuleType):
     
     def __contains__(self, element):
         if isinstance(element, str):
-            print [e for e in iter(self)]
             return element in (e.__class__.__name__ for e in iter(self))
         return (element in iter(self))
     
