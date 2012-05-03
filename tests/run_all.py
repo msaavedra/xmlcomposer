@@ -16,7 +16,7 @@ for obj in vars(xmlcomposer).values():
         suite.addTest(DocTestSuite(obj, optionflags=NORMALIZE_WHITESPACE))
 
 # Add the test subpackages.
-files = os.listdir(os.path.split(__file__)[0])
+files = os.listdir(os.path.split(os.path.abspath(__file__))[0])
 tests = [n[:-3] for n in files if n.startswith('test_') and n.endswith('.py')]
 suite.addTest(unittest.defaultTestLoader.loadTestsFromNames(tests))
 
