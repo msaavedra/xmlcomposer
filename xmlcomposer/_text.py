@@ -5,6 +5,7 @@
 """
 
 import re
+import inspect
 
 from _layout import SPARTAN_LAYOUT
 from _namespace import BASE_SCOPE
@@ -137,6 +138,68 @@ class TextBlock(object):
         """
         for line in self._contents:
             yield layout(line)
+    
+    def on(self, condition):
+        """Only generate output if the condition is matched.
+        
+        If the condition is a boolean expression, it is of course evaluated
+        immediately. For some contrived examples:
+        
+        >>> print TextBlock(['This is a test.']).on(1 + 1 == 2)
+        This is a test.
+        >>> print TextBlock(['This is a test.']).on(0 == 1)
+        <BLANKLINE>
+        
+        Also, the condition can be any callable object that expects no
+        arguments. It will be called at generation-time and the boolean value
+        of it's output will be used to determine if output should be generated.
+        
+        >>> x = True
+        >>> test = TextBlock(['This is a test.']).on(lambda: x)
+        >>> print test
+        This is a test.
+        >>> x = False
+        >>> print test
+        <BLANKLINE>
+        
+        Note that calling this method multiple times will combine the
+        conditions such that all must be True. The conditions will be evaluated
+        in the order of most recent first and are short-circuited in the event
+        that one of them evaluates to False.
+        
+        >>> print TextBlock(['This is a test.']).on(True).on(False)
+        <BLANKLINE>
+        >>> print TextBlock(['This is a test.']).on(False).on(True)
+        <BLANKLINE>
+        >>> print TextBlock(['This is a test.']).on(True).on(1)
+        This is a test.
+        
+        """
+        def skip(*args, **kwargs):
+            """Return an empty generator.
+            
+            This is a conditional replacement for the generate() method.
+            """
+            return (x for x in ())
+        
+        if callable(condition):
+            layout, scope, session = inspect.getargspec(self.generate).defaults
+            current_generate = self.generate
+            
+            def skip_lazily(self, layout=layout, scope=scope, session=session):
+                if condition():
+                    return current_generate(layout, scope, session)
+                else:
+                    return skip()
+            
+            self.generate = skip_lazily.__get__(self, self.__class__)
+            
+        elif condition:
+            self.generate = self.generate
+        else:
+            self.generate = skip.__get__(self, self.__class__)
+        
+        return self
 
 
 class SubstitutableTextBlock(TextBlock):
