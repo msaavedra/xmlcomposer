@@ -139,6 +139,13 @@ class TextBlock(object):
         for line in self._contents:
             yield layout(line)
     
+    def generate_empty(self, *args, **kwargs):
+        """Return an empty generator.
+        
+        This is a conditional replacement for the generate() method.
+        """
+        return (x for x in ())
+    
     def on(self, condition):
         """Only generate output if the condition is matched.
         
@@ -175,29 +182,21 @@ class TextBlock(object):
         This is a test.
         
         """
-        def skip(*args, **kwargs):
-            """Return an empty generator.
-            
-            This is a conditional replacement for the generate() method.
-            """
-            return (x for x in ())
-        
         if callable(condition):
             layout, scope, session = inspect.getargspec(self.generate).defaults
-            current_generate = self.generate
+            previous_generate = self.generate
             
             def skip_lazily(self, layout=layout, scope=scope, session=session):
                 if condition():
-                    return current_generate(layout, scope, session)
+                    return previous_generate(layout, scope, session)
                 else:
-                    return skip()
+                    return self.generate_empty()
             
+            # Bind the closure as an instance method.
             self.generate = skip_lazily.__get__(self, self.__class__)
-            
-        elif condition:
-            self.generate = self.generate
-        else:
-            self.generate = skip.__get__(self, self.__class__)
+        
+        elif not condition:
+            self.generate = self.generate_empty
         
         return self
 
