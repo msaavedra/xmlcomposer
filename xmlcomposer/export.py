@@ -60,7 +60,7 @@ def to_file(lines, file_name, backup_name=None, perms=0622):
     _replace(temp_name, file_name, backup_name)
     os.chmod(file_name, perms)
 
-def to_site(*args, **kwargs):
+def to_host(*args, **kwargs):
     """This is not implemented yet. When finished, it will upload to a remote
     host.
     """
